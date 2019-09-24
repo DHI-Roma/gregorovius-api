@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "ediarum-api"
+version = "0.1.0"
+description = "A boilerplate app for building web APIs for digital scholarly editions"
+authors = ["Theodor Costea <costea@bbaw.de>"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+pydantic = "^0.32.2"
+snakesist = {version = "^0.1.0-alpha.1", allows-prereleases = true}
+uvicorn = "^0.9.0"
+fastapi = "^0.38.1"
+pyyaml = "^5.1"
+schedule = "^0.6.0"
+xmltodict = "^0.12.0"
+[tool.poetry.dev-dependencies]
+pytest = "^5.1"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

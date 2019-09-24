@@ -1,0 +1,73 @@
+collection: '/db/projects/gregorovius/data/'
+entities:
+  letters:
+    xpath: '//*:TEI[@*:doctype="letter_fgbe"]'
+    properties:
+      title:
+        xpath: ['.//titleStmt/title']
+      sender:
+        xpath: [
+          './/correspAction[@type="sent"]/persName',
+          './/correspAction[@type="sent"]/orgName'
+        ]
+        attrib: ['key']
+        multiple: True
+      recipient:
+        xpath: [
+          './/correspAction[@type="received"]/persName',
+          './/correspAction[@type="received"]/orgName'
+        ]
+        attrib: ['key']
+        multiple: True
+      date:
+        xpath: ['.//correspAction[@type="sent"]/date']
+        attrib: ['when', 'notBefore', 'from']
+      place:
+        properties:
+          sent:
+            xpath: ['.//correspAction[@type="sent"]/placeName']
+            attrib: ['key']
+          received:
+            xpath: ['.//correspAction[@type="received"]/placeName']
+            attrib: ['key']
+        attrib: ['key']
+      incipit:
+        xpath: ['.//body//p[1]']
+        filter: 'get_substring_100'
+
+  persons:
+    xpath: '//*:TEI[@*:doctype="register"]//*:listPerson//*:person'
+    properties: 
+      name:
+        properties:
+          surname:
+            xpath: ['./persName[@type="reg"]/surname']
+          forename:
+            xpath: ['./persName[@type="reg"]/forename']
+          simpleName:
+            xpath: ['./persName[@type="reg"]/name']
+          roleName:
+            xpath: ['./persName[@type="reg"]/roleName']
+
+
+  places:
+    xpath: '//*:TEI[@*:doctype="register"]//*:listPlace//*:place'
+    properties:
+      name:
+        properties:
+          toponym:
+              xpath: ['./placeName']
+
+  institutions:
+    xpath: '//*:TEI[@*:doctype="register"]//*:listOrg//*:org'
+    properties: 
+      name:
+        properties:
+          orgName:
+            xpath: ['./orgName']
+
+  works:
+    xpath: '//*:TEI[@*:doctype="register"]//*:listBibl//*:bibl'
+    properties:
+      title:
+        xpath: ['./title']
