@@ -2,11 +2,16 @@ from fastapi import FastAPI
 from starlette.responses import Response, JSONResponse
 from starlette.requests import Request
 from starlette.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
 from typing import List
 from .model import EntityMeta
 from .service import Service, ENTITY_NAMES
 
-app = FastAPI()
+app = FastAPI(
+    title="Gregorovius Briefedition API",
+    version="1.0.0-beta",
+)
+
 app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -16,15 +21,16 @@ app.add_middleware(
 )
 
 
-
-
 class XMLResponse(Response):
     media_type = "application/xml"
 
 
 def create_endpoints_for(entity_name):
 
-    @app.get(f"/{entity_name}", response_model=List[EntityMeta])
+    @app.get(
+        f"/{entity_name}", response_model=List[EntityMeta],
+        summary=f"Read {entity_name} collection" 
+    )
     async def read_collection():
         collection = Service.get_entities(entity_name)
         return collection
@@ -34,13 +40,16 @@ def create_endpoints_for(entity_name):
         f"/{entity_name}/{{entity_id}}", 
         responses= {
             200: {
-                "description": f"Get an item from {entity_name}",
+                "description": f"an item from the {entity_name} collection",
                 "content": {
                     "application/xml": {},
                     "application/json": {}
                 }
-            }
-        }
+            },
+        },
+        response_model_skip_defaults=True,
+        status_code=200,
+        summary=f"Read {entity_name} item" 
     )
     async def read_entity(entity_id: str, request: Request):
         if request.headers["accept"] == "application/json":
