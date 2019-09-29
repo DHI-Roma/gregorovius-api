@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "ediarum-api"
+name = "gregorovius-api"
 version = "0.1.0"
-description = "A boilerplate app for building web APIs for digital scholarly editions"
+description = "The backend for the Gregorovius Correspondence Edition API"
 authors = ["Theodor Costea <costea@bbaw.de>"]
 
 [tool.poetry.dependencies]
