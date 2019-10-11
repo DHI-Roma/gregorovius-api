@@ -1,4 +1,6 @@
-collection: '/db/projects/gregorovius/data/'
+collection: '/db/projects/gregorovius/data/_web'
+xslt: True
+
 entities:
   letters:
     xpath: '//*:TEI[@*:doctype="letter_fgbe"]'
@@ -21,7 +23,7 @@ entities:
         multiple: True
       date:
         xpath: ['.//correspAction[@type="sent"]/date']
-        attrib: ['when', 'notBefore', 'from']
+        attrib: ['when', 'notBefore', 'from', 'notAfter']
       place:
         properties:
           sent:
@@ -34,9 +36,23 @@ entities:
       incipit:
         xpath: ['.//body//p[1]']
         filter: 'get_substring_100'
+      mentioned:
+        properties:
+          persons:
+            xpath: ['.//body//persName', './/body//orgName']
+            attrib: ['key']
+            multiple: True
+          places:
+            xpath: ['.//body//placeName']
+            attrib: ['key']
+            multiple: True
+          works:
+            xpath: ['.//body//bibl']
+            attrib: ['corresp', 'sameAs']
+            multiple: True
 
   persons:
-    xpath: '//*:TEI[@*:doctype="register"]//*:listPerson//*:person'
+    xpath: '//*:TEI[@*:doctype="register"]//(*:person|*:org)'
     properties: 
       name:
         properties:
@@ -48,6 +64,8 @@ entities:
             xpath: ['./persName[@type="reg"]/name']
           roleName:
             xpath: ['./persName[@type="reg"]/roleName']
+          orgName:
+            xpath: ['./orgName']
 
 
   places:
@@ -58,16 +76,12 @@ entities:
           toponym:
               xpath: ['./placeName']
 
-  institutions:
-    xpath: '//*:TEI[@*:doctype="register"]//*:listOrg//*:org'
-    properties: 
-      name:
-        properties:
-          orgName:
-            xpath: ['./orgName']
-
   works:
     xpath: '//*:TEI[@*:doctype="register"]//*:listBibl//*:bibl'
     properties:
       title:
         xpath: ['./title']
+      type: 
+        xpath: ['.']
+        attrib: ['type']
+

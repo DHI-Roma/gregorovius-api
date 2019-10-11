@@ -1,2 +1,6 @@
 .vscode/
+.hypothesis/
+.idea/
 app/__pycache__/
+**.pyc
+config.yml

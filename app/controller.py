@@ -1,17 +1,16 @@
+from typing import List
+
 from fastapi import FastAPI
+from snakesist.exist_client import ExistClient
 from starlette.responses import Response, JSONResponse
 from starlette.requests import Request
 from starlette.middleware.cors import CORSMiddleware
-from fastapi.exceptions import RequestValidationError
-from typing import List
-from .model import EntityMeta
-from .service import Service, ENTITY_NAMES
 
-app = FastAPI(
-    title="Gregorovius Briefedition API",
-    version="1.0.0-beta",
-)
+from service import Service
+from models import EntityMeta
+from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES
 
+app = FastAPI()
 app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -20,53 +19,86 @@ app.add_middleware(
         allow_headers=["*"],
 )
 
+db = ExistClient(host="db")
+db.root_collection = ROOT_COLLECTION
+service = Service(db, CFG, watch_updates=True)
+
 
 class XMLResponse(Response):
     media_type = "application/xml"
 
 
 def create_endpoints_for(entity_name):
+    """
+    Generate index and detail endpoints for a specified entity
+    :param entity_name: Name of the entity as configured in the manifest
+    """
 
-    @app.get(
-        f"/{entity_name}", response_model=List[EntityMeta],
-        summary=f"Read {entity_name} collection" 
-    )
+    @app.get(f"/{entity_name}", response_model=List[EntityMeta])
     async def read_collection():
-        collection = Service.get_entities(entity_name)
+        """
+        Retrieve all entities of a specific type
+        """
+        collection = service.get_entities(entity_name)
         return collection
 
-
     @app.get(
-        f"/{entity_name}/{{entity_id}}", 
-        responses= {
+        f"/{entity_name}/{{entity_id}}",
+        responses={
             200: {
-                "description": f"an item from the {entity_name} collection",
+                "description": f"Get an item from {entity_name}",
                 "content": {
                     "application/xml": {},
                     "application/json": {}
                 }
-            },
-        },
-        response_model_skip_defaults=True,
-        status_code=200,
-        summary=f"Read {entity_name} item" 
+            }
+        }
     )
     async def read_entity(entity_id: str, request: Request):
+        """
+        Retrieve an entity by its ID
+        """
         if request.headers["accept"] == "application/json":
-            entity = Service.get_entity(entity_name, entity_id, format="json")
-            if entity:
-                return JSONResponse(content=entity)
+            retrieved_entity = service.get_entity(entity_name, entity_id, output_format="json")
+            if retrieved_entity:
+                return JSONResponse(content=retrieved_entity)
             else:
-                return JSONResponse(status_code=404,content={"message": "Item not found"})
-        entity = Service.get_entity(entity_name, entity_id, format="xml")
+                return JSONResponse(status_code=404, content={"message": "Item not found"})
+        retrieved_entity = service.get_entity(entity_name, entity_id, output_format="xml")
         if entity:
-            return XMLResponse(content=entity)
+            return XMLResponse(content=retrieved_entity)
         else:
             return XMLResponse(
                 status_code=404,
                 content="<message>Item not found</message>"
             )
+    
+    if XSLT_FLAG:
+        @app.post(
+            f"/{entity_name}/{{entity_id}}", 
+            responses={
+                200: {
+                    "description": f"Transform an item from {entity_name} via XSL.",
+                    "content": {
+                        "application/html": {},
+                    }
+                }
+            }
+        )
+        async def transform_entity(entity_id: str, request: Request, xslt: bool = False):
+            """
+            Perform XSL transformation on an XML entity endpoint
+            """
+            if xslt:
+                stylesheet = await request.body()
+                return service.xslt_transform_entity(entity_name, entity_id, stylesheet)
+            else:
+                return XMLResponse(
+                    status_code=400,
+                    content="<message>Bad request</message>"
+                )
 
 
 for entity in ENTITY_NAMES:
     create_endpoints_for(entity)
+
