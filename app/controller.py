@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
 from snakesist.exist_client import ExistClient
 from starlette.responses import Response, JSONResponse
 from starlette.requests import Request
@@ -10,11 +11,12 @@ from service import Service
 from models import EntityMeta
 from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES
 
-app = FastAPI()
 
 db = ExistClient(host="db")
 db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
+
+app = FastAPI()
 
 
 class XMLResponse(Response):
@@ -94,4 +96,18 @@ def create_endpoints_for(entity_name):
 
 for entity in ENTITY_NAMES:
     create_endpoints_for(entity)
+
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="Gregorovius Correspondence Edition API",
+        version="1.0.0",
+        routes=app.routes,
+    )
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
 
