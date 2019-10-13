@@ -11,13 +11,6 @@ from models import EntityMeta
 from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES
 
 app = FastAPI()
-app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=False,
-        allow_methods=["*"],
-        allow_headers=["*"],
-)
 
 db = ExistClient(host="db")
 db.root_collection = ROOT_COLLECTION
