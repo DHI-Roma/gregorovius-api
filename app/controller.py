@@ -5,7 +5,6 @@ from fastapi.openapi.utils import get_openapi
 from snakesist.exist_client import ExistClient
 from starlette.responses import Response, JSONResponse
 from starlette.requests import Request
-from starlette.middleware.cors import CORSMiddleware
 
 from service import Service
 from models import EntityMeta
@@ -21,6 +20,24 @@ app = FastAPI()
 
 class XMLResponse(Response):
     media_type = "application/xml"
+
+
+@app.get(
+    "/cmif",
+    responses={
+        200: {
+            "content": {"application/xml": {}},
+            "description": "Get correspondence metadata in CMI format",
+        }
+    },
+)
+async def cmif_api():
+    """
+    Get correspondence metadata in CMI format
+    """
+    return XMLResponse(
+        content=str(db.retrieve_resources("//*:TEI[@type='cmif']").pop())
+    )
 
 
 def create_endpoints_for(entity_name):
@@ -42,45 +59,48 @@ def create_endpoints_for(entity_name):
         responses={
             200: {
                 "description": f"Get an item from {entity_name}",
-                "content": {
-                    "application/xml": {},
-                    "application/json": {}
-                }
+                "content": {"application/xml": {}, "application/json": {}},
             }
-        }
+        },
     )
     async def read_entity(entity_id: str, request: Request):
         """
         Retrieve an entity by its ID
         """
         if request.headers["accept"] == "application/json":
-            retrieved_entity = service.get_entity(entity_name, entity_id, output_format="json")
+            retrieved_entity = service.get_entity(
+                entity_name, entity_id, output_format="json"
+            )
             if retrieved_entity:
                 return JSONResponse(content=retrieved_entity)
             else:
-                return JSONResponse(status_code=404, content={"message": "Item not found"})
-        retrieved_entity = service.get_entity(entity_name, entity_id, output_format="xml")
+                return JSONResponse(
+                    status_code=404, content={"message": "Item not found"}
+                )
+        retrieved_entity = service.get_entity(
+            entity_name, entity_id, output_format="xml"
+        )
         if entity:
             return XMLResponse(content=retrieved_entity)
         else:
             return XMLResponse(
-                status_code=404,
-                content="<message>Item not found</message>"
+                status_code=404, content="<message>Item not found</message>"
             )
-    
+
     if XSLT_FLAG:
+
         @app.post(
-            f"/{entity_name}/{{entity_id}}", 
+            f"/{entity_name}/{{entity_id}}",
             responses={
                 200: {
                     "description": f"Transform an item from {entity_name} via XSL.",
-                    "content": {
-                        "application/html": {},
-                    }
+                    "content": {"application/html": {}},
                 }
-            }
+            },
         )
-        async def transform_entity(entity_id: str, request: Request, xslt: bool = False):
+        async def transform_entity(
+            entity_id: str, request: Request, xslt: bool = False
+        ):
             """
             Perform XSL transformation on an XML entity endpoint
             """
@@ -89,8 +109,7 @@ def create_endpoints_for(entity_name):
                 return service.xslt_transform_entity(entity_name, entity_id, stylesheet)
             else:
                 return XMLResponse(
-                    status_code=400,
-                    content="<message>Bad request</message>"
+                    status_code=400, content="<message>Bad request</message>"
                 )
 
 
@@ -103,11 +122,11 @@ def custom_openapi():
         return app.openapi_schema
     openapi_schema = get_openapi(
         title="Gregorovius Correspondence Edition API",
-        version="1.0.0",
+        version="1.1.0",
         routes=app.routes,
     )
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
-app.openapi = custom_openapi
 
+app.openapi = custom_openapi
