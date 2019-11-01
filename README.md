@@ -5,6 +5,10 @@ by any application. Gregorovius API is based on FastAPI, delb and snakesist
 and implements an API configuration model
 [proposed by Martin Fechner in 2018](https://core.ac.uk/download/pdf/154356753.pdf#page=205).
 
+The Gregorovius Correspondence Edition is developed by the German Historical
+Institute in Rome in collaboration with the Berlin-Brandenburg Academy of Sciences and
+Humanities, with funding from the German Research Foundation and the Gerda Henkel Foundation.
+
 ## Customizing and developing the backend app
 
 * Make sure you have [Poetry](https://poetry.eustace.io/docs/) 
