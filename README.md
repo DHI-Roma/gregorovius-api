@@ -1,7 +1,8 @@
 Gregorovius API is the main backend application for the
 [Gregorovius Correspondence Edition](https://gregorovius-edition.dhi-roma.it).
 It acts as an API layer on top of eXist-db and can be consumed as a web service
-by any application. Gregorovius API is based on FastAPI, delb and snakesist
+by any application. Gregorovius API is based on [FastAPI](https://fastapi.tiangolo.com/),
+[delb](https://delb.readthedocs.io/) and [snakesist](https://snakesist.readthedocs.io/)
 and implements an API configuration model
 [proposed by Martin Fechner in 2018](https://core.ac.uk/download/pdf/154356753.pdf#page=205).
 
