@@ -1,22 +1,26 @@
-This is a Python app for building an API layer between eXist-db and
-the frontend applications of  digital scholarly edition. 
-It can also be offered as a web service to make your edition
-machine readable. The API provides automatic Swagger documentation thanks
-to FastAPI.
+Gregorovius API is the main backend application for the
+[Gregorovius Correspondence Edition](https://gregorovius-edition.dhi-roma.it).
+It acts as an API layer on top of eXist-db and can be consumed as a web service
+by any application. Gregorovius API is based on FastAPI, delb and snakesist
+and implements an API configuration model
+[proposed by Martin Fechner in 2018](https://core.ac.uk/download/pdf/154356753.pdf#page=205).
 
-## Basic usage
+## Customizing and developing the backend app
 
 * Make sure you have [Poetry](https://poetry.eustace.io/docs/) 
   and Python 3.6 installed
 * Install dependencies by running `$ poetry install` in the root directory
-* Set up a `config.yml` file in the root directory
-* Make sure you have an eXist instance running locally on `localhost:8080`
-  (eXist 4.7.1, ideally, or lower).
+* Make sure you have an eXist instance running locally on `db:8080`
+  (eXist 4.7.1, ideally, or lower). If "db" doesn't cut it, adjust the host
+  name as you please in `app/controller.py`
 * Start the server `poetry run uvicorn app:main --reload` 
   (reload flag is optional)
+* Run the test suite as needed: `$ poetry run pytest`
 
 ## Setting up the manifest file
 
+`config.yml` is the manifest file which determines the content
+and structure of the data served by the web service.
 First, a few things to consider when setting up `config.yml`:
 
 * The file must be valid YAML, of course
@@ -24,26 +28,33 @@ First, a few things to consider when setting up `config.yml`:
 
 ### Manifest sections
 
+Currently the manifest file is tailored for eXist-db and
+uses XPath expressions to determine what data needs to queried.
+
 #### Collection path
-You can provide a path to the eXist collection of your project, to
-limit the spectrum of queries to that collection, e. g.
+You can provide a path to the eXist collection at the root of your project,
+to limit the spectrum of queries to that collection, e. g.
 
 ```yaml
 collection: /db/projects/gregorovius/data
 ```
 
 #### XSLT option
-If you need an XSLT transformation method for your XML endpoints, 
-you can switch the XSLT option to `True`. XSLT is disabled by default.
+If you want to allow XSLT (1.0) transformations for your XML endpoints,
+you can set the XSLT option to `True`. XSLT is disabled by default.
 
 ```yaml
 xslt: True
 ```
 
+When using the XSLT transformation feature, please note that
+the stylesheets processed by the app are restricted for security reasons: The
+body of an XSLT request must contain a stylesheet stripped of its root node.
+
 #### Entity definition
 
-Under an `entities:` block you define the items which will become
-your API endpoints. For instance, let's say we need letters and persons:
+Under the `entities:` block you define the items which will become
+your API endpoints. For instance, let's say we need two endpoints, letters and persons:
 
 ```yaml
 entities:
@@ -57,15 +68,18 @@ entities:
           - './persName[@type="reg"]'
 ```
 
-Notice how the root XPath differs from the deeper one in properties. The
-root XPath must have namespace prefixes while the others must not. 
+Notice how the root XPath differs from the deeper one in properties.
+First of all, the root XPath is a string, while the other ones are arrays.
+Root XPath expressions also must have namespace prefixes while the others must not.
 For now, a namespace prefix wildcard (`*:`) should do the trick. 
 Certain predefined prefixes (`tei:`, `xml:` etc.) should be made 
 available in a future version.
 
 #### Properties in entity definitions
 
-Properties can be nested. They can have an `xpath: ` value. 
+Properties, like the ones seen in the example above, can be nested.
+Each of them can have an `xpath: ` line pointing to the property value
+by using an *array* of XPath expressions.
 If they don't, any deeper XPath will be resolved relative to the 
 entity root. By default, properties yield a *single value* for a certain
 property. 
