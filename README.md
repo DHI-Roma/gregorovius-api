@@ -1,4 +1,4 @@
-![build](https://github.com/03b8/gregorovius-api/workflows/build/badge.svg)
+[![build](https://github.com/03b8/gregorovius-api/workflows/build/badge.svg)](https://github.com/03b8/gregorovius-api/actions?query=workflow%3Abuild)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Gregorovius API** is the main backend application for the
