@@ -1,4 +1,7 @@
-Gregorovius API is the main backend application for the
+![build](https://github.com/03b8/gregorovius-api/workflows/build/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+**Gregorovius API** is the main backend application for the
 [Gregorovius Correspondence Edition](https://gregorovius-edition.dhi-roma.it).
 It acts as an API layer on top of eXist-db and can be consumed as a web service
 by any application. Gregorovius API is based on [FastAPI](https://fastapi.tiangolo.com/),
