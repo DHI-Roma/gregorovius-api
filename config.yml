@@ -36,6 +36,9 @@ entities:
       incipit:
         xpath: ['.//body//p[1]']
         filter: 'get_substring_100'
+      resp:
+        xpath: ['.//titleStmt//persName/surname']
+        multiple: True
       mentioned:
         properties:
           persons:
