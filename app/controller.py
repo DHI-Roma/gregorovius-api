@@ -137,7 +137,7 @@ def custom_openapi():
         return app.openapi_schema
     openapi_schema = get_openapi(
         title="Gregorovius Correspondence Edition API",
-        version="1.1.0",
+        version="1.2.0",
         routes=app.routes,
     )
     app.openapi_schema = openapi_schema
