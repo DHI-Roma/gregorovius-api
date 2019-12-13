@@ -1,7 +1,9 @@
 import threading
 import time
+import html
 from datetime import datetime
 from typing import Dict, List
+from xml.dom import minidom
 
 import xmltodict
 from lxml import etree
@@ -117,11 +119,16 @@ class Service:
             "</index>"
             "</collection>"
         )
-        config_path = f"/db/system/config{self.manifest['collection']}"
-        self.db.query(
-            f'(xmldb:store("{config_path}", "collection.xconf", "{config}"),'
-            f'xmldb:reindex("{config_path}"))'
-        )
+        collection = self.manifest['collection']
+        config_path = f"/db/system/config{collection}"
+        try:
+            self.db.query(
+                f'(xmldb:create-collection("/db/system/config", "{collection}"),'
+                f'xmldb:store("{config_path}", "collection.xconf", "{config}"),'
+                f'xmldb:reindex("{config_path}"))'
+            )
+        except HTTPError as e:
+            print(e)
 
     def get_entities(self, entity_name: str) -> List[EntityMeta]:
         """
