@@ -125,7 +125,7 @@ class Service:
             self.db.query(
                 f'(xmldb:create-collection("/db/system/config", "{collection}"),'
                 f'xmldb:store("{config_path}", "collection.xconf", "{config}"),'
-                f'xmldb:reindex("{config_path}"))'
+                f'xmldb:reindex("{collection}"))'
             )
         except HTTPError as e:
             print(e)
