@@ -4,6 +4,12 @@ xslt: True
 entities:
   letters:
     xpath: '//*:TEI[@*:doctype="letter_fgbe"]'
+    search_index:
+      text: 
+      - qname: "tei:text"
+        inline-qname: "tei:ex"
+      - qname: "tei:p"
+        inline-qname: "tei:ex"
     properties:
       title:
         xpath: ['.//titleStmt/title']
@@ -53,6 +59,7 @@ entities:
             xpath: ['.//body//bibl']
             attrib: ['corresp', 'sameAs']
             multiple: True
+
 
   persons:
     xpath: '//*:TEI[@*:doctype="register"]//(*:person|*:org)'

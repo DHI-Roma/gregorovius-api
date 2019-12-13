@@ -5,6 +5,7 @@ from typing import Dict, List
 
 import xmltodict
 from lxml import etree
+from requests.exceptions import HTTPError
 from snakesist.exist_client import ExistClient
 
 from models import EntityMeta
@@ -82,6 +83,45 @@ class Service:
             self.id_attr = '{http://www.w3.org/XML/1998/namespace}id'
         if watch_updates:
             UpdateWatcher(self.db, self.entities)
+        self._initialize_search_indices()
+
+    def _initialize_search_indices(self):
+        """
+        Create Lucene search configurations according to config.yml,
+        store them in the database and initiate reindexing.
+        """
+        searchable_entities = [
+            entity_conf["search_index"] for entity_name, entity_conf in self.manifest["entities"].items()
+            if "search_index" in entity_conf
+        ]
+        text_config = ""
+        for unit in searchable_entities:
+            try:
+                for text in unit["text"]:
+                    text_config += (
+                        f"<text qname='{text['qname']}'>"
+                        f"<inline qname='{text['inline-qname']}'/>"
+                        "</text>"
+                    )
+            except KeyError:
+                raise ValueError(f"Error reading search index configuration: {unit}.")
+
+        config = (
+            "<collection xmlns='http://exist-db.org/collection-config/1.0'>"
+            "<index xmlns:tei='http://www.tei-c.org/ns/1.0'>"
+            "<fulltext default='none' attributes='false'/>"
+            "<lucene>"
+            "<analyzer class='org.apache.lucene.analysis.standard.StandardAnalyzer'/>"
+            f"{text_config}"
+            "</lucene>"
+            "</index>"
+            "</collection>"
+        )
+        config_path = f"/db/system/config{self.manifest['collection']}"
+        self.db.query(
+            f'(xmldb:store("{config_path}", "collection.xconf", "{config}"),'
+            f'xmldb:reindex("{config_path}"))'
+        )
 
     def get_entities(self, entity_name: str) -> List[EntityMeta]:
         """
@@ -121,8 +161,63 @@ class Service:
                     output = resource.node
                 return xmltodict.parse(str(output))
             else:
-                raise ValueError(f"Invalid format: {output_format}. Only 'xml' and 'json' are supported.")
+                raise ValueError(
+                    f"Invalid format: {output_format}."
+                    f"Only 'xml' and 'json' are supported."
+                )
         return resource
+
+    def get_search_results(self, entity: str, keyword: str, width: int) -> Dict:
+        """
+        Make a full text search query against the database. The database index must be
+        configured as a prerequisite. At the moment the query is hard coded to a single
+        XML node (//*:text).
+        :param entity: The name of the entity as configured in config.yml
+        :param keyword: The string to search for
+        :param width: The width of the context strings surrounding the found keyword
+        """
+        try:
+            self.manifest_entities[entity]["search_index"]
+        except KeyError:
+            return {"error": f"Search is not available for {entity}."}
+        keyword = keyword.replace("'", "")
+        keyword = keyword.replace('"', "")
+        entity_xpath = self.manifest_entities[entity]["xpath"]
+        coll_path = self.manifest["collection"]
+        try:
+            query_results = self.db.query((
+                f"import module namespace "
+                f"kwic = 'http://exist-db.org/xquery/kwic' "
+                f"at 'resource:org/exist/xquery/lib/kwic.xql'; "
+                f"for $hit in "
+                f"collection('{coll_path}')"
+                f"//*:text[ft:query(.,'{keyword}') and ancestor::{entity_xpath.lstrip('//')}] "
+                f"let $score := ft:score($hit) "
+                f"order by $score descending "
+                f"return <envelope><kwic>{{kwic:summarize($hit, <config width='{width}'/>)}}</kwic>"
+                f"<score>{{$score}}</score>"
+                f"<id>{{$hit/ancestor::{entity_xpath.lstrip('//')}/@xml:id/string()}}</id></envelope>"
+            ))
+            results = query_results.css_select("envelope")
+        except HTTPError as e:
+            results  = []
+        output = []
+        for r in results:
+            context_previous = r.xpath(".//span[@class='previous']").pop().full_text
+            context_hi = r.xpath(".//span[@class='hi']").pop().full_text
+            context_following = r.xpath(".//span[@class='following']").pop().full_text
+            score = r.xpath(".//score").pop().full_text
+            entity_id = r.xpath(".//id").pop().full_text
+            output.append({
+                "previous": " ".join(context_previous.split()),
+                "hi": " ".join(context_hi.split()),
+                "following": " ".join(context_following.split()),
+                "entity_id": entity_id
+            })
+        return {
+            "count": len(output),
+            "results": output
+        }
 
     @staticmethod
     def sanitize_stylesheet(stylesheet: str) -> str:

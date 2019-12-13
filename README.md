@@ -120,3 +120,33 @@ extract an attribute value, insert an `attr` option:
 The property ID extracted by default is the `@xml:id` of your entity node.
 Other fallback attributes for the ID are not available atm, but planned 
 for a future version.
+
+#### Fulltext search index configuration
+
+A basic fulltext search API endpoint can be configured using the `search_index`  
+key to set up `text` parameters for the Lucene configuration. The following 
+configuration block
+
+```yaml
+  search_index:
+    text:
+    - qname: "tei:text"
+      inline-qname: "tei:ex"
+    - qname: "tei:p"
+      inline-qname: "tei:ex"
+```
+ 
+will create the following Lucene configuration
+
+```xml
+ <analyzer class="org.apache.lucene.analysis.standard.StandardAnalyzer"/>
+ <text qname="tei:text">
+     <inline qname="tei:ex"/>
+ </text>
+ <text qname="tei:p">
+     <inline qname="tei:ex"/>
+ </text>
+```
+
+Notice that the current implementation contains defaults and hard coded values. 
+This is an experimental feature for now. Please use with care.

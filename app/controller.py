@@ -40,6 +40,21 @@ async def cmif_api():
     )
 
 
+@app.get(
+    "/search",
+    responses={
+        200: {
+            "description": "Get full text search results",
+        }
+    },
+)
+async def search(q, entity, width=50):
+    """
+    Get full text search results
+    """
+    return service.get_search_results(keyword=q, entity=entity, width=width)
+
+
 def create_endpoints_for(entity_name):
     """
     Generate index and detail endpoints for a specified entity
