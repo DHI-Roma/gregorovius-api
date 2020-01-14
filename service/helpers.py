@@ -149,10 +149,6 @@ def xml_to_entitymeta(
     :return:
     """
     properties = process_properties(property_manifest["properties"], db_resource.node)
-    db_id = {
-        "abs": db_resource.abs_resource_id,
-        "node": db_resource.node_id
-    }
     try:
         node_id = db_resource.node[id_attrib]
     except (KeyError, TypeError):
@@ -160,7 +156,6 @@ def xml_to_entitymeta(
         node_id = ''
     return EntityMeta(
         id=node_id,
-        db_id=db_id,
         entity=entity_name,
         properties=properties
     )
