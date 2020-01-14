@@ -95,7 +95,8 @@ def create_endpoints_for(entity_name):
         retrieved_entity = service.get_entity(
             entity_name, entity_id, output_format="xml"
         )
-        if entity:
+        print(entity)
+        if retrieved_entity:
             return XMLResponse(content=retrieved_entity)
         else:
             return XMLResponse(
