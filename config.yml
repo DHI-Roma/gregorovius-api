@@ -85,7 +85,12 @@ entities:
       name:
         properties:
           toponym:
-              xpath: ['./placeName']
+            xpath: ['./placeName']
+      geonamesUri: 
+        xpath: ['./idno']
+      type:
+        xpath: ['.']
+        attrib: ['type']
 
   works:
     xpath: '//*:TEI[@*:doctype="register"]//*:listBibl//*:bibl'
