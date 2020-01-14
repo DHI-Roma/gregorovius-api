@@ -60,10 +60,12 @@ entities:
             attrib: ['corresp', 'sameAs']
             multiple: True
 
-
   persons:
     xpath: '//*:TEI[@*:doctype="register"]//(*:person|*:org)'
     properties: 
+      type:
+        xpath: ['.']
+        filter: 'get_node_name'
       name:
         properties:
           surname:
@@ -76,7 +78,6 @@ entities:
             xpath: ['./persName[@type="reg"]/roleName']
           orgName:
             xpath: ['./orgName']
-
 
   places:
     xpath: '//*:TEI[@*:doctype="register"]//*:listPlace//*:place'

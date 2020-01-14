@@ -14,12 +14,12 @@ def normalize_whitespace(value: str) -> str:
     return ' '.join(value.split())
 
 
-def apply_filter(value: str, filter_name: str) -> str:
+def apply_filter(value: TagNode, filter_name: str) -> str:
     """
-    Apply a filter to a string value
-    :param value: String to be processed
+    Apply a filter that makes changes to an XML node and outputs a value.
+    :param value: XML node to be processed
     :param filter_name: Name of the filter function defined in filters.py
-    :return: Processed string
+    :return: Processed output
     """
     from .filters import Functions as f
     try:
@@ -42,13 +42,17 @@ def process_property_value(node: TagNode, property_manifest: Dict) -> str:
     if 'attrib' in property_manifest:
         for val in property_manifest['attrib']:
             try:
-                output = normalize_whitespace(node[val])
+                if "filter" in property_manifest:
+                    output = apply_filter(node[val], property_manifest["filter"])
+                else:
+                    output = normalize_whitespace(node[val])
             except KeyError:
                 continue
     else:
-        output = normalize_whitespace(node.full_text)
-    if "filter" in property_manifest:
-        output = apply_filter(output, property_manifest["filter"])
+        if "filter" in property_manifest:
+            output = apply_filter(node, property_manifest["filter"])
+        else:
+            output = normalize_whitespace(node.full_text)
     return output
 
 
