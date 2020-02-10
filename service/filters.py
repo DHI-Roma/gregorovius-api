@@ -19,3 +19,10 @@ class Functions:
     def get_node_name(selected_node: TagNode) -> str:
         """Return the tag name of a node"""
         return selected_node.local_name
+
+
+    def get_full_name(selected_node: TagNode) -> str:
+        """Return the full name of a person or organization"""
+        if selected_node.local_name == "persName":
+            return ", ".join(n.full_text for n in selected_node if n.full_text != " ")
+        return selected_node.full_text

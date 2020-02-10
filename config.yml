@@ -78,6 +78,9 @@ entities:
             xpath: ['./persName[@type="reg"]/roleName']
           orgName:
             xpath: ['./orgName']
+          fullName:
+            xpath: ['./persName[@type="reg"]', './orgName[@type="reg"]']
+            filter: 'get_full_name'
 
   places:
     xpath: '//*:TEI[@*:doctype="register"]//*:listPlace//*:place'
