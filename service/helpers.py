@@ -24,11 +24,9 @@ def apply_filter(value: TagNode, filter_name: str) -> str:
     from .filters import Functions as f
     try:
         filter_func = getattr(f, filter_name)
-        value = filter_func(value)
     except AttributeError:
         print(f"Filter is undefined: {filter_name}")
-    finally:
-        return value
+    return filter_func(value)
 
 
 def process_property_value(node: TagNode, property_manifest: Dict) -> str:
