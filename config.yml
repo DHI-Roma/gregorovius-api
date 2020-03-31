@@ -1,4 +1,4 @@
-collection: '/db/projects/gregorovius/public-export'
+collection: '/db/projects/gregorovius/data'
 xslt: True
 
 entities:
