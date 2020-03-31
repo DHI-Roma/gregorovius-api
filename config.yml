@@ -1,4 +1,4 @@
-collection: '/db/projects/gregorovius/data'
+collection: '/db/projects/gregorovius/data-sync'
 xslt: True
 
 entities:
