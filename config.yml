@@ -5,11 +5,18 @@ entities:
   letters:
     xpath: '//*:TEI[@*:doctype="letter_fgbe"]'
     search_index:
+      entrypoint: "//tei:text"
+      results:
+        get_document_id: True
       text: 
-      - qname: "tei:text"
+      - pattern: "tei:text"
+        type: "qname"
         inline-qname: "tei:ex"
-      - qname: "tei:p"
+        ignore: "tei:note"
+      - pattern: "tei:p"
+        type: "qname"
         inline-qname: "tei:ex"
+        ignore: "tei:note"
     properties:
       title:
         xpath: ['.//titleStmt/title']
@@ -104,3 +111,13 @@ entities:
         xpath: ['.']
         attrib: ['type']
 
+  comments:
+    xpath: '//*:TEI[@*:doctype="letter_fgbe"]//*:seg/*:note'
+    search_index:
+      entrypoint: "//tei:seg/tei:note[@xml:id]"
+      results:
+        get_document_id: False
+      text: 
+      - pattern: "tei:note"
+        type: "qname"
+        inline-qname: "tei:ex"

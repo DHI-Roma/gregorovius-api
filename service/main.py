@@ -101,10 +101,18 @@ class Service:
             try:
                 for text in unit["text"]:
                     text_config += (
-                        f"<text qname='{text['qname']}'>"
+                        f"<text {text['type']}='{text['pattern']}'>"
                         f"<inline qname='{text['inline-qname']}'/>"
-                        "</text>"
                     )
+
+                    if "fields" in text:
+                        for field in text["fields"]:
+                            print(field)
+                            text_config += f"<field name='{field['name']}' expression='{field['expression']}' />"
+
+                    if "ignore" in text:
+                        text_config += f"<ignore  qname='{text['ignore']}'/>"
+                    text_config += "</text>"
             except KeyError:
                 raise ValueError(f"Error reading search index configuration: {unit}.")
 
@@ -190,20 +198,28 @@ class Service:
         keyword = keyword.replace("'", "")
         keyword = keyword.replace('"', "")
         entity_xpath = self.manifest_entities[entity]["xpath"]
+        entity_entrypoint = self.manifest_entities[entity]["search_index"]["entrypoint"]
+        should_get_document_id = self.manifest_entities[entity]["search_index"]["results"]["get_document_id"]
+        
+        id_processing = f"$hit/@xml:id/string()"
+        if should_get_document_id:
+            id_processing = f"$hit/ancestor::{entity_xpath.lstrip('//')}/@xml:id/string()"
+
         coll_path = self.manifest["collection"]
         try:
             query_results = self.db.query((
+                f"declare namespace tei ='http://www.tei-c.org/ns/1.0'; "
                 f"import module namespace "
                 f"kwic = 'http://exist-db.org/xquery/kwic' "
                 f"at 'resource:org/exist/xquery/lib/kwic.xql'; "
                 f"for $hit in "
                 f"collection('{coll_path}')"
-                f"//*:text[ft:query(.,'{keyword}') and ancestor::{entity_xpath.lstrip('//')}] "
+                f"{entity_entrypoint}[ft:query(.,'{keyword}') and ancestor::{entity_xpath.lstrip('//')}] "
                 f"let $score := ft:score($hit) "
                 f"order by $score descending "
                 f"return <envelope><kwic>{{kwic:summarize($hit, <config width='{width}'/>)}}</kwic>"
                 f"<score>{{$score}}</score>"
-                f"<id>{{$hit/ancestor::{entity_xpath.lstrip('//')}/@xml:id/string()}}</id></envelope>"
+                f"<id>{{{id_processing}}}</id></envelope>"
             ))
             results = query_results.css_select("envelope")
         except HTTPError as e:
