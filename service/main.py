@@ -201,13 +201,13 @@ class Service:
         entity_entrypoint = self.manifest_entities[entity]["search_index"]["entrypoint"]
         should_get_document_id = self.manifest_entities[entity]["search_index"]["results"]["get_document_id"]
         
-        id_processing = f"$hit/@xml:id/string()"
-        if should_get_document_id:
-            id_processing = f"$hit/ancestor::{entity_xpath.lstrip('//')}/@xml:id/string()"
-
+        id_processing_default = f"$hit/ancestor::{entity_xpath.lstrip('//')}/@xml:id/string()"
+        id_processing_local = f"$hit/@xml:id/string()"
+        id_processing_root = f"$hit/ancestor::*:TEI/@xml:id/string()"
+        
         coll_path = self.manifest["collection"]
         try:
-            query_results = self.db.query((
+            query = (
                 f"declare namespace tei ='http://www.tei-c.org/ns/1.0'; "
                 f"import module namespace "
                 f"kwic = 'http://exist-db.org/xquery/kwic' "
@@ -219,8 +219,18 @@ class Service:
                 f"order by $score descending "
                 f"return <envelope><kwic>{{kwic:summarize($hit, <config width='{width}'/>)}}</kwic>"
                 f"<score>{{$score}}</score>"
-                f"<id>{{{id_processing}}}</id></envelope>"
-            ))
+            )
+            if should_get_document_id:
+                query += f"<id>{{{id_processing_default}}}</id>"
+            else:
+                query += (
+                    f"<id>{{{id_processing_local}}}</id>"
+                    f"<related>{{{id_processing_root}}}</related>"
+                )
+
+            query += "</envelope>"
+
+            query_results = self.db.query(query)
             results = query_results.css_select("envelope")
         except HTTPError as e:
             results  = []
@@ -231,12 +241,19 @@ class Service:
             context_following = r.xpath(".//span[@class='following']").pop().full_text
             score = r.xpath(".//score").pop().full_text
             entity_id = r.xpath(".//id").pop().full_text
-            output.append({
+
+            entry = {
                 "previous": " ".join(context_previous.split()),
                 "hi": " ".join(context_hi.split()),
                 "following": " ".join(context_following.split()),
-                "entity_id": entity_id
-            })
+                "entity_id": entity_id,
+            }
+
+            if not should_get_document_id:
+                entity_related_id = r.xpath(".//related").pop().full_text
+                entry["entity_related_id"] = entity_related_id
+
+            output.append(entry)
         return {
             "count": len(output),
             "results": output

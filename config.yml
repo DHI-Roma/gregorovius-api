@@ -18,6 +18,10 @@ entities:
         inline-qname: "tei:ex"
         ignore: "tei:note"
     properties:
+      comments:
+        xpath: ['.//seg/note']
+        attrib: ['{http://www.w3.org/XML/1998/namespace}id']
+        multiple: True
       title:
         xpath: ['.//titleStmt/title']
       sender:
@@ -66,6 +70,7 @@ entities:
             xpath: ['.//body//bibl']
             attrib: ['corresp', 'sameAs']
             multiple: True
+
 
   persons:
     xpath: '//*:TEI[@*:doctype="register"]//(*:person|*:org)'
@@ -121,3 +126,8 @@ entities:
       - pattern: "tei:note"
         type: "qname"
         inline-qname: "tei:ex"
+    properties:
+      content:
+        xpath: ['.']
+      letter:
+        xpath: ['..']
