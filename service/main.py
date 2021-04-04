@@ -243,6 +243,7 @@ class Service:
             entity_id = r.xpath(".//id").pop().full_text
 
             entry = {
+                "score": score,
                 "previous": " ".join(context_previous.split()),
                 "hi": " ".join(context_hi.split()),
                 "following": " ".join(context_following.split()),
