@@ -107,7 +107,6 @@ class Service:
 
                     if "fields" in text:
                         for field in text["fields"]:
-                            print(field)
                             text_config += f"<field name='{field['name']}' expression='{field['expression']}' />"
 
                     if "ignore" in text:
@@ -134,6 +133,17 @@ class Service:
                 f'(xmldb:create-collection("/db/system/config", "{collection}"),'
                 f'xmldb:store("{config_path}", "collection.xconf", "{config}"),'
                 f'xmldb:reindex("{collection}"))'
+            )
+        except HTTPError as e:
+            print(e)
+
+        collection_alt = self.manifest['collection_alternative']
+        config_path_alt = f"/db/system/config{collection}"
+        try:
+            self.db.query(
+                f'(xmldb:create-collection("/db/system/config", "{collection_alt}"),'
+                f'xmldb:store("{config_path_alt}", "collection.xconf", "{config}"),'
+                f'xmldb:reindex("{collection_alt}"))'
             )
         except HTTPError as e:
             print(e)
@@ -206,9 +216,13 @@ class Service:
         id_processing_root = f"$hit/ancestor::*:TEI/@xml:id/string()"
         
         coll_path = self.manifest["collection"]
+        if "use_alternative_collection" in self.manifest_entities[entity]["search_index"]:
+            if self.manifest_entities[entity]["search_index"]:
+                coll_path = self.manifest["collection_alternative"]
+
         try:
             query = (
-                f"declare namespace tei ='http://www.tei-c.org/ns/1.0'; "
+                f"declare namespace tei = 'http://www.tei-c.org/ns/1.0'; "
                 f"import module namespace "
                 f"kwic = 'http://exist-db.org/xquery/kwic' "
                 f"at 'resource:org/exist/xquery/lib/kwic.xql'; "
@@ -219,6 +233,7 @@ class Service:
                 f"order by $score descending "
                 f"return <envelope><kwic>{{kwic:summarize($hit, <config width='{width}'/>)}}</kwic>"
                 f"<score>{{$score}}</score>"
+                f"<type>{entity}</type>"
             )
             if should_get_document_id:
                 query += f"<id>{{{id_processing_default}}}</id>"
@@ -236,25 +251,27 @@ class Service:
             results  = []
         output = []
         for r in results:
-            context_previous = r.xpath(".//span[@class='previous']").pop().full_text
-            context_hi = r.xpath(".//span[@class='hi']").pop().full_text
-            context_following = r.xpath(".//span[@class='following']").pop().full_text
-            score = r.xpath(".//score").pop().full_text
-            entity_id = r.xpath(".//id").pop().full_text
+            for p in r.xpath(".//p"): 
+                context_previous = p.xpath(".//span[@class='previous']").pop().full_text
+                context_hi = p.xpath(".//span[@class='hi']").pop().full_text
+                context_following = p.xpath(".//span[@class='following']").pop().full_text
+                score = r.xpath(".//score").pop().full_text
+                entity_id = r.xpath(".//id").pop().full_text
+                entity_type = r.xpath(".//type").pop().full_text
 
-            entry = {
-                "score": score,
-                "previous": " ".join(context_previous.split()),
-                "hi": " ".join(context_hi.split()),
-                "following": " ".join(context_following.split()),
-                "entity_id": entity_id,
-            }
+                entry = {
+                    "score": score,
+                    "previous": " ".join(context_previous.split()),
+                    "hi": " ".join(context_hi.split()),
+                    "following": " ".join(context_following.split()),
+                    "entity_id": entity_id,
+                }
 
-            if not should_get_document_id:
-                entity_related_id = r.xpath(".//related").pop().full_text
-                entry["entity_related_id"] = entity_related_id
+                if not should_get_document_id:
+                    entity_related_id = r.xpath(".//related").pop().full_text
+                    entry["entity_related_id"] = entity_related_id
 
-            output.append(entry)
+                output.append(entry)
         return {
             "count": len(output),
             "results": output

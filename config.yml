@@ -1,10 +1,12 @@
 collection: '/db/projects/gregorovius/data-sync'
+collection_alternative: '/db/projects/gregorovius/data-sync-alternative'
 xslt: True
 
 entities:
   letters:
     xpath: '//*:TEI[@*:doctype="letter_fgbe"]'
     search_index:
+      use_alternative_collection: True
       entrypoint: "//tei:text"
       results:
         get_document_id: True
