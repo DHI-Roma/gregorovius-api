@@ -83,6 +83,20 @@ For now, a namespace prefix wildcard (`*:`) should do the trick.
 Certain predefined prefixes (`tei:`, `xml:` etc.) should be made 
 available in a future version.
 
+If you want to specify namespaces in tag names or attribute keys in your `config.yml`,
+use the full XML namespace URI. For example, if you want to specifically get the value of `xml:id`,
+you can do it like this:
+
+```yml
+properties:
+  comments:
+  xpath: ['.//seg/note']
+  attrib: ['{http://www.w3.org/XML/1998/namespace}id']
+  multiple: True
+```
+
+      
+
 #### Properties in entity definitions
 
 Properties, like the ones seen in the example above, can be nested.
@@ -123,6 +137,8 @@ for a future version.
 
 #### Fulltext search index configuration
 
+*Note: Please refer to the [eXist-db Full Text Index documentation](https://exist-db.org/exist/apps/doc/lucene)*
+
 A basic fulltext search API endpoint can be configured using the `search_index`  
 key to set up `text` parameters for the Lucene configuration. The following 
 configuration block
@@ -130,21 +146,27 @@ configuration block
 ```yaml
   search_index:
     text:
-    - qname: "tei:text"
-      inline-qname: "tei:ex"
-    - qname: "tei:p"
-      inline-qname: "tei:ex"
+    - pattern: "tei:text"
+        type: "qname"
+        inline-qname: "tei:ex"
+        ignore: "tei:note"
+    - pattern: "//tei:p"
+        type: "match"
+        inline-qname: "tei:ex"
+        ignore: "tei:note"
 ```
  
-will create the following Lucene configuration
+will create the following Lucene configuration in the eXist-db:
 
 ```xml
  <analyzer class="org.apache.lucene.analysis.standard.StandardAnalyzer"/>
  <text qname="tei:text">
      <inline qname="tei:ex"/>
+     <ignore qname="tei:note" />
  </text>
- <text qname="tei:p">
+ <text match="//tei:p">
      <inline qname="tei:ex"/>
+     <ignore qname="tei:note"/>
  </text>
 ```
 

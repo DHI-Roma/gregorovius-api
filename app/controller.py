@@ -12,6 +12,7 @@ from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES
 
 
 db = ExistClient(host="db")
+## db = ExistClient(host="localhost")
 db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
 
@@ -95,7 +96,6 @@ def create_endpoints_for(entity_name):
         retrieved_entity = service.get_entity(
             entity_name, entity_id, output_format="xml"
         )
-        print(entity)
         if retrieved_entity:
             return XMLResponse(content=retrieved_entity)
         else:
