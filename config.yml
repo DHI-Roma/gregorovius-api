@@ -90,6 +90,9 @@ entities:
             xpath: ['./persName[@type="reg"]/name']
           roleName:
             xpath: ['./persName[@type="reg"]/roleName']
+          role:
+            xpath: ['.']
+            attrib: ['role']
           orgName:
             xpath: ['./orgName']
           fullName:
