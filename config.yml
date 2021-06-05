@@ -98,6 +98,15 @@ entities:
           fullName:
             xpath: ['./persName[@type="reg"]', './orgName[@type="reg"]']
             filter: 'get_full_name'
+          altNameSubtype:
+            xpath: ['./persName[@type="alt"]']
+            attrib: ['subtype']
+          altSurname:
+            xpath: ['./persName[@type="alt"]/surname']
+          altForename:
+            xpath: ['./persName[@type="alt"]/forename']
+          altSimpleName:
+            xpath: ['./persName[@type="alt"]/name']
 
   places:
     xpath: '//*:TEI[@*:doctype="register"]//*:listPlace//*:place'
