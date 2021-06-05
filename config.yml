@@ -80,6 +80,9 @@ entities:
       type:
         xpath: ['.']
         filter: 'get_node_name'
+      role:
+        xpath: ['.']
+        attrib: ['role']
       name:
         properties:
           surname:
@@ -90,9 +93,6 @@ entities:
             xpath: ['./persName[@type="reg"]/name']
           roleName:
             xpath: ['./persName[@type="reg"]/roleName']
-          role:
-            xpath: ['.']
-            attrib: ['role']
           orgName:
             xpath: ['./orgName']
           fullName:
