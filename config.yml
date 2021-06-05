@@ -80,6 +80,9 @@ entities:
       type:
         xpath: ['.']
         filter: 'get_node_name'
+      role:
+        xpath: ['.']
+        attrib: ['role']
       name:
         properties:
           surname:
