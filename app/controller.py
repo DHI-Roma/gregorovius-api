@@ -8,11 +8,11 @@ from starlette.requests import Request
 
 from service import Service
 from models import EntityMeta
-from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES
+from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES, STAGE
 
 
-db = ExistClient(host="db")
-## db = ExistClient(host="localhost")
+#db = ExistClient(host="db")
+db = ExistClient(host="localhost")
 db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
 
@@ -141,6 +141,11 @@ def custom_openapi():
         version="1.3.2",
         routes=app.routes,
     )
+
+    if STAGE == "prod":
+        openapi_schema["servers"] = [
+            { "url" : "/api" }
+        ]
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
