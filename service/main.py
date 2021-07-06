@@ -205,8 +205,6 @@ class Service:
             self.manifest_entities[entity]["search_index"]
         except KeyError:
             return {"error": f"Search is not available for {entity}."}
-        keyword = keyword.replace("'", "")
-        keyword = keyword.replace('"', "")
         entity_xpath = self.manifest_entities[entity]["xpath"]
         entity_entrypoint = self.manifest_entities[entity]["search_index"]["entrypoint"]
         should_get_document_id = self.manifest_entities[entity]["search_index"]["results"]["get_document_id"]
