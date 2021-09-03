@@ -83,6 +83,10 @@ entities:
       role:
         xpath: ['.']
         attrib: ['role']
+      birth:
+        xpath: ['./birth']
+      death:
+        xpath: ['./death']
       name:
         properties:
           surname:
