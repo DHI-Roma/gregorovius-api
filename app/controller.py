@@ -6,13 +6,13 @@ from snakesist.exist_client import ExistClient
 from starlette.responses import Response, JSONResponse
 from starlette.requests import Request
 
-from service import Service
+from service import Service, gnd_service
 from models import EntityMeta
 from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES, STAGE
 
 
-db = ExistClient(host="db")
-#db = ExistClient(host="localhost")
+# db = ExistClient(host="db")
+db = ExistClient(host="localhost")
 db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
 
@@ -131,6 +131,15 @@ def create_endpoints_for(entity_name):
 
 for entity in ENTITY_NAMES:
     create_endpoints_for(entity)
+
+
+@app.get(f"/beacon/all")
+def get_beacon(request: Request):
+    collection = service.get_entities('persons')
+    gnds = gnd_service.get_gnd_ids(collection)
+    gnd_service.make_beacon_header()
+    return gnds
+
 
 
 def custom_openapi():
