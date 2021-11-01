@@ -3,7 +3,7 @@ from typing import List
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from snakesist.exist_client import ExistClient
-from starlette.responses import Response, JSONResponse
+from starlette.responses import Response, JSONResponse, PlainTextResponse
 from starlette.requests import Request
 
 from service import Service, gnd_service
@@ -11,8 +11,8 @@ from models import EntityMeta
 from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES, STAGE
 
 
-# db = ExistClient(host="db")
-db = ExistClient(host="localhost")
+db = ExistClient(host="db")
+# db = ExistClient(host="localhost")
 db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
 
@@ -134,20 +134,44 @@ for entity in ENTITY_NAMES:
 
 
 @app.get(f"/beacon/all")
-def get_beacon(request: Request):
+def get_beacon() -> PlainTextResponse:
+    """
+    Generate BEACON file for all persons and organizations identified with a GND number
+    """
     collection = service.get_entities('persons')
     gnds = gnd_service.get_gnd_ids(collection)
-    gnd_service.make_beacon_header()
-    return gnds
+    header = gnd_service.make_beacon_header()
+    beacon = header + "\n".join(gnds)
+    return PlainTextResponse(beacon)
 
+@app.get(f"/beacon/persons")
+def get_beacon_person() -> PlainTextResponse:
+    """
+    Generate BEACON file for all persons identified with a GND number, without organizations
+    """
+    collection = service.get_entities('persons')
+    gnds = gnd_service.get_gnd_ids(collection, gnd_service.FILTER_PERSON)
+    header = gnd_service.make_beacon_header(gnd_service.FILTER_PERSON)
+    beacon = header + "\n".join(gnds)
+    return PlainTextResponse(beacon)
 
+@app.get(f"/beacon/organizations")
+def get_beacon_person() -> PlainTextResponse:
+    """
+    Generate BEACON file for all organizations identified with a GND number, without actual persons
+    """
+    collection = service.get_entities('persons')
+    gnds = gnd_service.get_gnd_ids(collection, gnd_service.FILTER_ORGANIZATION)
+    header = gnd_service.make_beacon_header(gnd_service.FILTER_ORGANIZATION)
+    beacon = header + "\n".join(gnds)
+    return PlainTextResponse(beacon)
 
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
     openapi_schema = get_openapi(
         title="Gregorovius Correspondence Edition API",
-        version="1.3.2",
+        version="1.4.0",
         routes=app.routes,
     )
 
