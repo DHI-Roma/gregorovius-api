@@ -80,6 +80,8 @@ entities:
       type:
         xpath: ['.']
         filter: 'get_node_name'
+      gnd:
+        xpath: ['./idno']
       role:
         xpath: ['.']
         attrib: ['role']
