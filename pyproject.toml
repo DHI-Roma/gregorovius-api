@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gregorovius-api"
-version = "1.5.0"
+version = "1.5.1"
 description = "Backend API layer for the Gregorovius Correspondence Edition"
 authors = ["Theodor Costea <costea@bbaw.de>", "Oliver Pohl <kontakt@wildegans-solutions.de>"]
 
