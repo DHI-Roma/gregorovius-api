@@ -60,10 +60,6 @@ entities:
         multiple: True
       mentioned:
         properties:
-          all:
-            xpath: ['.//body//persName', './/body//orgName', './/body//placeName', './/body//bibl']
-            attrib: ['key', 'corresp', 'sameAs']
-            multiple: True
           persons:
             xpath: ['.//body//persName', './/body//orgName']
             attrib: ['key']
