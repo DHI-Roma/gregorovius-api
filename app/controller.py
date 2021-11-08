@@ -1,18 +1,19 @@
 from typing import List
 
+import requests
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from snakesist.exist_client import ExistClient
 from starlette.responses import Response, JSONResponse, PlainTextResponse
 from starlette.requests import Request
 
-from service import Service, gnd_service
+from service import Service, beacon_service
 from models import EntityMeta
 from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES, STAGE
 
 
 db = ExistClient(host="db")
-# db = ExistClient(host="localhost")
+#db = ExistClient(host="localhost")
 db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
 
@@ -139,8 +140,8 @@ def get_beacon() -> PlainTextResponse:
     Generate BEACON file for all persons and organizations identified with a GND number
     """
     collection = service.get_entities('persons')
-    gnds = gnd_service.get_gnd_ids(collection)
-    header = gnd_service.make_beacon_header()
+    gnds = beacon_service.get_gnd_ids(collection)
+    header = beacon_service.make_beacon_header()
     beacon = header + "\n".join(gnds)
     return PlainTextResponse(beacon)
 
@@ -150,8 +151,8 @@ def get_beacon_person() -> PlainTextResponse:
     Generate BEACON file for all persons identified with a GND number, without organizations
     """
     collection = service.get_entities('persons')
-    gnds = gnd_service.get_gnd_ids(collection, gnd_service.FILTER_PERSON)
-    header = gnd_service.make_beacon_header(gnd_service.FILTER_PERSON)
+    gnds = beacon_service.get_gnd_ids(collection, beacon_service.FILTER_PERSON)
+    header = beacon_service.make_beacon_header(beacon_service.FILTER_PERSON)
     beacon = header + "\n".join(gnds)
     return PlainTextResponse(beacon)
 
@@ -161,10 +162,23 @@ def get_beacon_person() -> PlainTextResponse:
     Generate BEACON file for all organizations identified with a GND number, without actual persons
     """
     collection = service.get_entities('persons')
-    gnds = gnd_service.get_gnd_ids(collection, gnd_service.FILTER_ORGANIZATION)
-    header = gnd_service.make_beacon_header(gnd_service.FILTER_ORGANIZATION)
+    gnds = beacon_service.get_gnd_ids(collection, beacon_service.FILTER_ORGANIZATION)
+    header = beacon_service.make_beacon_header(beacon_service.FILTER_ORGANIZATION)
     beacon = header + "\n".join(gnds)
     return PlainTextResponse(beacon)
+
+@app.get(f"/beacon/seeAlso/{{gnd}}")
+async def get_beacon_see_also(gnd: str):
+    """
+    Get references in other data sources for a given GND number
+    """
+    headers =  {'Content-Type': 'application/json'}
+    url = 'https://beacon.findbuch.de/seealso/pnd-aks?format=seealso&id=' + gnd
+    findbuch_response = requests.get(url, headers=headers)
+    findbuch_response.encoding = 'UTF-8'
+
+    transformed_data = beacon_service.map_seealso_data(findbuch_response.json())
+    return JSONResponse(transformed_data)
 
 def custom_openapi():
     if app.openapi_schema:

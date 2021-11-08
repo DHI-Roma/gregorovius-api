@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Dict
 
 from models import EntityMeta
 
@@ -56,3 +56,24 @@ def make_beacon_header(filter_type: str='all') -> str:
         header += f'#{field}: {metadata[field]}\n'
 
     return header
+
+
+def map_seealso_data(seealso_data: Dict) -> Dict:
+
+    transformed_data = {
+        'dnb': seealso_data[0]
+    }
+
+    entries = []
+    for i in range(0, len(seealso_data[1])):
+       entry = {
+           'short': seealso_data[1][i],
+           'long': seealso_data[2][i],
+           'url': seealso_data[3][i],
+       }
+
+       entries.append(entry)
+
+    transformed_data["entries"] = entries
+
+    return transformed_data
