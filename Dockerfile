@@ -1,4 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.6-2020-12-19
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
 
 WORKDIR /backend
 COPY . /backend
