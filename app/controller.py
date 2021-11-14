@@ -6,6 +6,8 @@ from fastapi.openapi.utils import get_openapi
 from snakesist.exist_client import ExistClient
 from starlette.responses import Response, JSONResponse, PlainTextResponse
 from starlette.requests import Request
+from random import choice
+from string import ascii_letters
 
 from service import Service, beacon_service
 from models import EntityMeta
@@ -18,7 +20,7 @@ db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
 
 app = FastAPI()
-
+db_version_hash = ''.join(choice(ascii_letters) for i in range(12))
 
 class XMLResponse(Response):
     media_type = "application/xml"
@@ -179,6 +181,12 @@ async def get_beacon_see_also(gnd: str):
 
     transformed_data = beacon_service.map_seealso_data(findbuch_response.json())
     return JSONResponse(transformed_data)
+
+@app.get(f"/version/")
+def get_version_hash() -> JSONResponse:
+    response = {"version": db_version_hash}
+    return JSONResponse(response)
+
 
 def custom_openapi():
     if app.openapi_schema:
