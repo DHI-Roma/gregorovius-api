@@ -8,11 +8,12 @@ from starlette.responses import Response, JSONResponse, PlainTextResponse
 from starlette.requests import Request
 from random import choice
 from string import ascii_letters
+from pathlib import Path
+from multiprocessing import Manager
 
 from service import Service, beacon_service
 from models import EntityMeta
 from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES, STAGE
-
 
 db = ExistClient(host="db")
 #db = ExistClient(host="localhost")
@@ -20,10 +21,21 @@ db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
 
 app = FastAPI()
-db_version_hash = ''.join(choice(ascii_letters) for i in range(12))
+meta = {}
 
 class XMLResponse(Response):
     media_type = "application/xml"
+
+@app.on_event('startup')
+async def on_startup():
+    try:
+        db_version_file = Path(__file__).parent / "../.db-version"
+        with db_version_file.open('r') as version:
+            db_version_hash = version.read().strip("\n")
+    except FileNotFoundError:
+        db_version_hash = ''.join(choice(ascii_letters) for i in range(12))
+
+    meta['version'] = db_version_hash
 
 
 @app.get(
@@ -184,7 +196,7 @@ async def get_beacon_see_also(gnd: str):
 
 @app.get(f"/version/")
 def get_version_hash() -> JSONResponse:
-    response = {"version": db_version_hash}
+    response = {"version": meta['version']}
     return JSONResponse(response)
 
 
