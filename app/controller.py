@@ -20,10 +20,15 @@ db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
 
 app = FastAPI()
-db_version_hash = ''.join(choice(ascii_letters) for i in range(12))
+meta = {}
 
 class XMLResponse(Response):
     media_type = "application/xml"
+
+@app.on_event('startup')
+async def on_startup():
+    db_version_hash = ''.join(choice(ascii_letters) for i in range(12))
+    meta['version'] = db_version_hash
 
 
 @app.get(
@@ -184,7 +189,7 @@ async def get_beacon_see_also(gnd: str):
 
 @app.get(f"/version/")
 def get_version_hash() -> JSONResponse:
-    response = {"version": db_version_hash}
+    response = {"version": meta['version']}
     return JSONResponse(response)
 
 
