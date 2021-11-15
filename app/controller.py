@@ -31,7 +31,7 @@ async def on_startup():
     try:
         db_version_file = Path(__file__).parent / "../.db-version"
         with db_version_file.open('r') as version:
-            db_version_hash = version.read()
+            db_version_hash = version.read().strip("\n")
     except FileNotFoundError:
         db_version_hash = ''.join(choice(ascii_letters) for i in range(12))
 
