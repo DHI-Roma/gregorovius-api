@@ -8,28 +8,25 @@ from starlette.responses import Response, JSONResponse, PlainTextResponse
 from starlette.requests import Request
 from random import choice
 from string import ascii_letters
+from multiprocessing import Manager
 
 from service import Service, beacon_service
 from models import EntityMeta
 from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES, STAGE
 
+manager = Manager()
+store = manager.dict()
+store['version'] = ''.join(choice(ascii_letters) for i in range(12))
 
 db = ExistClient(host="db")
-#db = ExistClient(host="localhost")
+# db = ExistClient(host="localhost")
 db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
 
 app = FastAPI()
-meta = {}
 
 class XMLResponse(Response):
     media_type = "application/xml"
-
-@app.on_event('startup')
-async def on_startup():
-    db_version_hash = ''.join(choice(ascii_letters) for i in range(12))
-    meta['version'] = db_version_hash
-
 
 @app.get(
     "/cmif",
@@ -189,7 +186,7 @@ async def get_beacon_see_also(gnd: str):
 
 @app.get(f"/version/")
 def get_version_hash() -> JSONResponse:
-    response = {"version": meta['version']}
+    response = {"version": store['version']}
     return JSONResponse(response)
 
 
