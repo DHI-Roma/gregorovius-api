@@ -8,6 +8,7 @@ from starlette.responses import Response, JSONResponse, PlainTextResponse
 from starlette.requests import Request
 from random import choice
 from string import ascii_letters
+from pathlib import Path
 from multiprocessing import Manager
 
 from service import Service, beacon_service
@@ -28,12 +29,12 @@ class XMLResponse(Response):
 @app.on_event('startup')
 async def on_startup():
     try:
-        with open('../.db-version', 'r') as version:
+        db_version_file = Path(__file__).parent / "../.db-version"
+        with db_version_file.open('r') as version:
             db_version_hash = version.read()
     except FileNotFoundError:
         db_version_hash = ''.join(choice(ascii_letters) for i in range(12))
 
-    print(db_version_hash)
     meta['version'] = db_version_hash
 
 
