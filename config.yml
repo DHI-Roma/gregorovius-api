@@ -6,8 +6,8 @@ entities:
   letters:
     xpath: '//*:TEI[@*:doctype="letter_fgbe"]'
     search_index:
-      use_alternative_collection: False
-      entrypoint: "//tei:text"
+      use_alternative_collection: True
+      entrypoint: "//(tei:text|tei:note)"
       results:
         get_document_id: True
       text: 

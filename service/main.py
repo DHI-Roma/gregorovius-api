@@ -127,12 +127,21 @@ class Service:
             "</collection>"
         )
         collection = self.manifest['collection']
+        collection_alternative = self.manifest['collection_alternative']
+
         config_path = f"/db/system/config{collection}"
+        config_path_alternative = f"/db/system/config{collection_alternative}"
         try:
             self.db.query(
                 f'(xmldb:create-collection("/db/system/config", "{collection}"),'
                 f'xmldb:store("{config_path}", "collection.xconf", "{config}"),'
                 f'xmldb:reindex("{collection}"))'
+            )
+
+            self.db.query(
+                f'(xmldb:create-collection("/db/system/config", "{collection_alternative}"),'
+                f'xmldb:store("{config_path_alternative}", "collection.xconf", "{config}"),'
+                f'xmldb:reindex("{collection_alternative}"))'
             )
         except HTTPError as e:
             print(e)
@@ -243,7 +252,6 @@ class Service:
 
             query += "</envelope>"
 
-            print(query)
             query_results = self.db.query(query)
             results = query_results.css_select("envelope")
         except HTTPError as e:
