@@ -214,7 +214,7 @@ class Service:
         id_processing_root = f"$hit/ancestor::*:TEI/@xml:id/string()"
         
         coll_path = self.manifest["collection"]
-        if "use_alternative_collection" in self.manifest_entities[entity]["search_index"]:
+        if "use_alternative_collection" in self.manifest_entities[entity]["search_index"] and self.manifest_entities[entity]["search_index"]["use_alternative_collection"] is True:
             if self.manifest_entities[entity]["search_index"]:
                 coll_path = self.manifest["collection_alternative"]
 
@@ -243,6 +243,7 @@ class Service:
 
             query += "</envelope>"
 
+            print(query)
             query_results = self.db.query(query)
             results = query_results.css_select("envelope")
         except HTTPError as e:
