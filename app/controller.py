@@ -10,15 +10,18 @@ from random import choice
 from string import ascii_letters
 from pathlib import Path
 from multiprocessing import Manager
+from diskcache import Cache
 
 from service import Service, beacon_service
 from models import EntityMeta
 from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES, STAGE
 
-db = ExistClient(host="db")
-#db = ExistClient(host="localhost")
+# db = ExistClient(host="db")
+db = ExistClient(host="localhost")
 db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
+
+cache = Cache()
 
 app = FastAPI()
 meta = {}
@@ -82,7 +85,11 @@ def create_endpoints_for(entity_name):
         """
         Retrieve all entities of a specific type
         """
-        collection = service.get_entities(entity_name)
+        cache_key = f"/{entity_name}"
+        if cache_key not in cache:
+            cache[cache_key] = service.get_entities(entity_name)
+
+        collection = cache[cache_key]
         return collection
 
     @app.get(
@@ -99,18 +106,25 @@ def create_endpoints_for(entity_name):
         Retrieve an entity by its ID
         """
         if request.headers["accept"] == "application/json":
-            retrieved_entity = service.get_entity(
-                entity_name, entity_id, output_format="json"
-            )
+            cache_key = f"{entity_name}_{entity_id}_json"
+            if cache_key not in cache:
+                cache[cache_key] = service.get_entity(
+                    entity_name, entity_id, output_format="json"
+                )
+            retrieved_entity = cache[cache_key]
             if retrieved_entity:
                 return JSONResponse(content=retrieved_entity)
             else:
                 return JSONResponse(
                     status_code=404, content={"message": "Item not found"}
                 )
-        retrieved_entity = service.get_entity(
-            entity_name, entity_id, output_format="xml"
-        )
+
+        cache_key = f"{entity_name}_{entity_id}_xml"
+        if cache_key not in cache:
+            cache[cache_key] = service.get_entity(
+                entity_name, entity_id, output_format="xml"
+            )
+        retrieved_entity = cache[cache_key]
         if retrieved_entity:
             return XMLResponse(content=retrieved_entity)
         else:

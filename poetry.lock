@@ -103,6 +103,14 @@ lxml = "*"
 https-loader = ["requests (>=2.21,<3.0)"]
 
 [[package]]
+name = "diskcache"
+version = "5.4.0"
+description = "Disk Cache -- Disk and file backed persistent cache."
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
 name = "docutils"
 version = "0.15.2"
 description = "Docutils -- Python Documentation Utilities"
@@ -575,7 +583,7 @@ testing = ["pathlib2", "contextlib2", "unittest2"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "cc2be153a27300379c755f074dc4d246b6e2737fc9b7841d418ed25bad688c20"
+content-hash = "06246333764d7c9a8f209535b5b1aa3d0e0c54589368f5f8d696b6a5eb77243e"
 
 [metadata.files]
 alabaster = [
@@ -621,6 +629,10 @@ dataclasses = [
 delb = [
     {file = "delb-0.1.2-py3-none-any.whl", hash = "sha256:2f208f4d4a47195fd11bf102149601a6ac757ce11b5c2e18a4e551341e32ce3d"},
     {file = "delb-0.1.2.tar.gz", hash = "sha256:63c124757f0eba7d12b99d71caf0f6cea8bd73331e52a77249764b7e7f92b8b9"},
+]
+diskcache = [
+    {file = "diskcache-5.4.0-py3-none-any.whl", hash = "sha256:af3ec6d7f167bbef7b6c33d9ee22f86d3e8f2dd7131eb7c4703d8d91ccdc0cc4"},
+    {file = "diskcache-5.4.0.tar.gz", hash = "sha256:8879eb8c9b4a2509a5e633d2008634fb2b0b35c2b36192d89655dbde02419644"},
 ]
 docutils = [
     {file = "docutils-0.15.2-py2-none-any.whl", hash = "sha256:9e4d7ecfc600058e07ba661411a2b7de2fd0fafa17d1a7f7361cd47b1175c827"},
