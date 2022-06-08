@@ -16,8 +16,8 @@ from service import Service, beacon_service
 from models import EntityMeta
 from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES, STAGE
 
-# db = ExistClient(host="db")
-db = ExistClient(host="localhost")
+db = ExistClient(host="db")
+# db = ExistClient(host="localhost")
 db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
 
