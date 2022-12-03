@@ -172,3 +172,9 @@ will create the following Lucene configuration in the eXist-db:
 
 Notice that the current implementation contains defaults and hard coded values. 
 This is an experimental feature for now. Please use with care.
+
+## Facsimiles
+
+- Place all the facsimile images in the `img/hd` directory (ignored)
+- Run `poetry run bin/convert_images` to create webp derivatives
+- Upload `img/webp` directory to the production server
