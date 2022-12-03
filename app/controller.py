@@ -16,8 +16,16 @@ from service import Service, beacon_service, image_service
 from models import EntityMeta
 from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES, STAGE
 
-# db = ExistClient(host="db")
-db = ExistClient(host="localhost")
+from starlette.middleware.cors import CORSMiddleware
+
+origins = [
+    "http://localhost:8080",
+    "http://localhost:8081",
+]
+
+
+db = ExistClient(host="db")
+# db = ExistClient(host="localhost")
 db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
 
@@ -25,6 +33,14 @@ cache = Cache()
 
 app = FastAPI()
 meta = {}
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class XMLResponse(Response):
     media_type = "application/xml"
@@ -161,12 +177,24 @@ def create_endpoints_for(entity_name):
 for entity in ENTITY_NAMES:
     create_endpoints_for(entity)
 
-@app.get(f"/facsimiles")
+@app.get(f"/facsimiles/")
 def get_facsimiles() -> JSONResponse:
     cache_key = f"/facsimiles"
     if cache_key not in cache:
         cache[cache_key] = image_service.generate_image_map()
     return JSONResponse(cache[cache_key])
+
+@app.get(f"/facsimiles/{{letter_id}}/")
+def get_facsimile_for_letter(letter_id: str)  -> Response:
+    cache_key = f"/facsimiles"
+    if cache_key not in cache:
+        cache[cache_key] = image_service.generate_image_map()
+
+    facsimiles = cache[cache_key]
+    if letter_id not in facsimiles:
+        return PlainTextResponse(f"No facsimiles found for letter {letter_id}", 400)
+
+    return JSONResponse(facsimiles[letter_id])
 
 @app.get(f"/facsimiles/{{letter_id}}/{{page}}")
 async def get_facsimile_image(letter_id: str, page: int) -> Response:
