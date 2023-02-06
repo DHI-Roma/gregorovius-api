@@ -209,7 +209,7 @@ async def get_facsimile_image(letter_id: str, page: int) -> Response:
     if page not in facsimiles[letter_id]:
         return PlainTextResponse(f"No facsimile with {page} found for letter {letter_id}", 400)
 
-    return FileResponse(f"./img/webp/{facsimiles[letter_id][page]}", media_type="image/webp")
+    return FileResponse(f"./img/webp/{facsimiles[letter_id][page]['name']}", media_type="image/webp")
 
 @app.get(f"/beacon/all")
 def get_beacon() -> PlainTextResponse:
