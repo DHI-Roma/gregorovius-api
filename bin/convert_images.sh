@@ -9,5 +9,5 @@ for file in ${IMAGE_PATH}/*; do
   echo "Converting ${file}"
   filename=$(basename -- "$file")
   filename="${filename%.*}"
-  convert ${file} -define webp:lossless=false ${WEBP_PATH}/${filename}.webp
+  convert "${file}" -define webp:lossless=false "${WEBP_PATH}/${filename}.webp"
 done
