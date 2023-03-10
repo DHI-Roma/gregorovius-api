@@ -248,6 +248,14 @@ pyparsing = ">=2.0.2"
 six = "*"
 
 [[package]]
+name = "pillow"
+version = "7.2.0"
+description = "Python Imaging Library (Fork)"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[[package]]
 name = "pluggy"
 version = "0.13.0"
 description = "plugin and hook calling mechanisms for python"
@@ -591,7 +599,7 @@ testing = ["pathlib2", "contextlib2", "unittest2"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "f836b89a44428f0c11df4c2cf1f088465627898a73e6891c1c135d35f1ac95e1"
+content-hash = "b4064951f6df39b8712237d1e996aec55109cc2afaadefacd455c7405a099ec6"
 
 [metadata.files]
 aiofiles = []
@@ -765,6 +773,7 @@ packaging = [
     {file = "packaging-19.2-py2.py3-none-any.whl", hash = "sha256:d9551545c6d761f3def1677baf08ab2a3ca17c56879e70fecba2fc4dde4ed108"},
     {file = "packaging-19.2.tar.gz", hash = "sha256:28b924174df7a2fa32c1953825ff29c61e2f5e082343165438812f00d3a7fc47"},
 ]
+pillow = []
 pluggy = [
     {file = "pluggy-0.13.0-py2.py3-none-any.whl", hash = "sha256:0db4b7601aae1d35b4a033282da476845aa19185c1e6964b25cf324b5e4ec3e6"},
     {file = "pluggy-0.13.0.tar.gz", hash = "sha256:fa5fa1622fa6dd5c030e9cad086fa19ef6a0cf6d7a2d12318e10cb49d6d68f34"},

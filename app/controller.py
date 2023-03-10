@@ -4,7 +4,7 @@ import requests
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from snakesist.exist_client import ExistClient
-from starlette.responses import Response, JSONResponse, PlainTextResponse, FileResponse
+from starlette.responses import Response, JSONResponse, PlainTextResponse, FileResponse, StreamingResponse
 from starlette.requests import Request
 from random import choice
 from string import ascii_letters
@@ -17,6 +17,8 @@ from models import EntityMeta
 from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES, STAGE
 
 from starlette.middleware.cors import CORSMiddleware
+from PIL import Image
+from io import BytesIO
 
 origins = [
     "http://localhost:8080",
@@ -196,8 +198,8 @@ def get_facsimile_for_letter(letter_id: str)  -> Response:
 
     return JSONResponse(facsimiles[letter_id])
 
-@app.get(f"/facsimiles/{{letter_id}}/{{page}}")
-async def get_facsimile_image(letter_id: str, page: int) -> Response:
+@app.get(f"/facsimiles/{{letter_id}}/{{page}}/{{rotation}}")
+async def get_facsimile_image(letter_id: str, page: int, rotation: int) -> Response:
     cache_key = f"/facsimiles"
     if cache_key not in cache:
         cache[cache_key] = image_service.generate_image_map()
@@ -209,7 +211,14 @@ async def get_facsimile_image(letter_id: str, page: int) -> Response:
     if page not in facsimiles[letter_id]:
         return PlainTextResponse(f"No facsimile with {page} found for letter {letter_id}", 400)
 
-    return FileResponse(f"./img/webp/{facsimiles[letter_id][page]['name']}", media_type="image/webp")
+    img = Image.open(f"./img/webp/{facsimiles[letter_id][page]['name']}", mode="r")
+    img = img.rotate(rotation, expand=True)
+
+    rotated_image = BytesIO()
+    img.save(rotated_image, "WEBP")
+    rotated_image.seek(0)
+
+    return StreamingResponse(rotated_image, media_type="image/webp")
 
 @app.get(f"/beacon/all")
 def get_beacon() -> PlainTextResponse:
