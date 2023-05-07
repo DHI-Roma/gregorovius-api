@@ -12,7 +12,7 @@ from pathlib import Path
 from multiprocessing import Manager
 from diskcache import Cache
 
-from service import Service, beacon_service, image_service
+from service import Service, beacon_service, image_service, letter_index_service
 from models import EntityMeta
 from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES, STAGE
 
@@ -26,8 +26,8 @@ origins = [
 ]
 
 
-db = ExistClient(host="db")
-# db = ExistClient(host="localhost")
+# db = ExistClient(host="db")
+db = ExistClient(host="localhost")
 db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
 
@@ -265,6 +265,10 @@ async def get_beacon_see_also(gnd: str):
 
     transformed_data = beacon_service.map_seealso_data(findbuch_response.json())
     return JSONResponse(transformed_data)
+
+@app.get(f"/full-letter-index/")
+async def get_full_letter_index():
+    return letter_index_service.parse_gesamtdatenbank()
 
 @app.get(f"/version/")
 def get_version_hash() -> JSONResponse:

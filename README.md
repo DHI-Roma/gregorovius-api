@@ -178,3 +178,7 @@ This is an experimental feature for now. Please use with care.
 - Place all the facsimile images in the `img/hd` directory (ignored)
 - Run `poetry run bin/convert_images` to create webp derivatives
 - Upload `img/webp` directory to the production server
+
+## Gesamtdatenbank
+
+- Open the `gesamtdatenbank.xslx` with a spreadsheet editor of your choice and save it to semicolon separated CSV
