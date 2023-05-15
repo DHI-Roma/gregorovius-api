@@ -1,5 +1,5 @@
 aufbewahrungsorte = [
-    "Universitätsbibliothek Amsterdam",
+    "Allard Pierson, University of Amsterdam (statt Universitätsbibliothek Amsterdam)"
     "Staatsbibliothek Bamberg",
     "Basel, Erbengemeinschaft Wilhelm",
     "Universitätsbibliothek Basel",
@@ -88,4 +88,5 @@ aufbewahrungsorte = [
     "Herzog-August-Bibliothek Wolfenbüttel",
     "Niedersächsisches Landesarchiv, Standort Wolfenbüttel",
     "Universität Würzburg, Martin-von-Wagner-Museum",
+    "Zentralbibliothek Zürich"
 ]
