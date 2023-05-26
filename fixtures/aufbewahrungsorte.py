@@ -1,5 +1,5 @@
 aufbewahrungsorte = [
-    "Allard Pierson, University of Amsterdam (statt Universitätsbibliothek Amsterdam)"
+    "Allard Pierson, University of Amsterdam",
     "Staatsbibliothek Bamberg",
     "Basel, Erbengemeinschaft Wilhelm",
     "Universitätsbibliothek Basel",
