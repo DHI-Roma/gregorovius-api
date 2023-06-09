@@ -12,34 +12,81 @@ def parse_gesamtdatenbank():
     date_earliest = ''
     date_latest = ''
     index = 0
+
+    names = parse_names()
+    print(names)
+
     with open(os.path.dirname(__file__) + '/../data/gesamtdatenbank.csv', encoding='utf-8') as csvfile:
         csvreader = csv.DictReader(csvfile, delimiter=';')
 
         for entry in csvreader:
             if not len(entry['sender-1']) and not len(entry['recipient-1']):
                 continue
+                
+            senders = []
+            if entry['sender-1'] in names:
+                senders = [names[entry['sender-1']]]
+                print(names[entry['sender-1']])
+                sender_1 = names[entry['sender-1']]['name']
+            else:
+                sender_1 = entry['sender-1']
+                senders.append({
+                    'name': entry['sender-1'],
+                    'gnd': None,
+                    'birth': None,
+                    'death': None
+                })
 
-            senders = [entry['sender-1']]
-
-            if entry['sender-1'] not in unique_senders and len(entry['sender-1']) :
-                unique_senders.append(entry['sender-1'])
+            if sender_1 not in unique_senders and len(sender_1):
+                unique_senders.append(sender_1)
 
             if entry['sender-2']:
-                senders.append(entry['sender-2'])
+                if entry['sender-2'] in names:
+                    senders.append(names[entry['sender-2']])
+                    sender_2 = names[entry['sender-2']]['name']
+                else:
+                    sender_2 = entry['sender-2']
+                    senders.append({
+                        'name': entry['sender-2'],
+                        'gnd': None,
+                        'birth': None,
+                        'death': None
+                    })
 
-            if entry['sender-2'] not in unique_senders and len(entry['sender-2']):
-                unique_senders.append(entry['sender-2'])
+                if sender_2 not in unique_senders and len(sender_2):
+                    unique_senders.append(sender_2)
 
-            recipients = [entry['recipient-1']]
+            recipients = []
+            if entry['recipient-1'] in names:
+                recipients = [names[entry['recipient-1']]]
+                recipient_1 = names[entry['recipient-1']]['name']
+            else:
+                recipient_1 = entry['recipient-1']
+                recipients.append({
+                    'name': entry['recipient-1'],
+                    'gnd': None,
+                    'birth': None,
+                    'death': None
+                })
 
-            if entry['recipient-1'] not in unique_recipients and len(entry['recipient-1']):
-                unique_recipients.append(entry['recipient-1'])
+            if recipient_1 not in unique_recipients and len(recipient_1):
+                unique_recipients.append(recipient_1)
 
             if entry['recipient-2']:
-                recipients.append(entry['recipient-2'])
+                if entry['recipient-2'] in names:
+                    recipients.append(names[entry['recipient-2']])
+                    recipient_2 = names[entry['recipient-2']]['name']
+                else:
+                    recipient_2 = entry['recipient-2']
+                    recipients.append({
+                        'name': entry['recipient-2'],
+                        'gnd': None,
+                        'birth': None,
+                        'death': None
+                    })
 
-            if entry['recipient-2'] not in unique_recipients and len(entry['recipient-2']):
-                unique_recipients.append(entry['recipient-2'])
+                if recipient_2 not in unique_recipients and len(recipient_2):
+                    unique_recipients.append(recipient_2)
 
             if entry['sender-placeName'] not in unique_sender_places and len(entry['sender-placeName']):
                 unique_sender_places.append(entry['sender-placeName'])
@@ -119,14 +166,21 @@ def parse_gesamtdatenbank():
             ## Ensure that it will be sorted at end of year
             date_index = date_index.replace('-00', '-99').replace('0000', '9999')
 
+            reference = entry['Handschrift- oder Abschriftennachweis']
+            relevant_holding_locations = []
+            for aufbewahrungsort in aufbewahrungsorte:
+                if aufbewahrungsort in reference:
+                    relevant_holding_locations.append(aufbewahrungsort)
+
             result = {
                 'index': index,
                 'xml_id': entry['xml-id'],
-                'lfdnr': entry['lfdnr'],
                 'date_index': date_index,
                 'status': entry['auswahl'],
                 'senders': senders,
                 'recipients': recipients,
+                'sender_names': [sender['name'] for sender in senders],
+                'recipient_names': [recipient['name'] for recipient in recipients],
                 'placename_sent': entry['sender-placeName'],
                 'placename_received': entry['recipient-placeName'],
                 'date_cert': entry['date-cert'],
@@ -138,8 +192,9 @@ def parse_gesamtdatenbank():
                 'relevant_years': relevant_years,
                 'incipit': entry['incipit'],
                 'scope': entry['Umfang'],
-                'reference': entry['Handschrift- oder Abschriftennachweis'],
+                'reference': reference,
                 'print_reference': entry['Drucknachweis'],
+                'relevant_holding_locations': relevant_holding_locations
             }
 
             results.append(result)
@@ -167,4 +222,19 @@ def parse_gesamtdatenbank():
         'date_latest': date_latest
     }
 
+def parse_names():
+    with open(os.path.dirname(__file__) + '/../data/gesamtdatenbank_namen.csv', encoding='utf-8') as csvfile:
+        csvreader = csv.DictReader(csvfile, delimiter=';')
 
+        names_by_full_name = {}
+        for entry in csvreader:
+            result = {
+                'name': entry['gnd-name'],
+                'gnd': entry['gnd-id'] if len(entry['gnd-id']) else None,
+                'birth': entry['j-geburt'],
+                'death': entry['j-tod']
+            }
+
+            names_by_full_name[entry['name']] = result
+            
+        return names_by_full_name
