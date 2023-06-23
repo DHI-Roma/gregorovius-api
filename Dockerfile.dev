@@ -1,0 +1,12 @@
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.6-2020-12-19
+
+WORKDIR /app
+
+RUN pip install poetry lxml snakesist python-dotenv diskcache
+
+COPY ./pyproject.toml ./poetry.lock* ./
+
+RUN poetry install
+
+COPY . .
+# COPY .env.production .env
