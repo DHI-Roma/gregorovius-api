@@ -26,12 +26,12 @@ def parse_gesamtdatenbank():
             senders = []
             if entry['sender-1'] in names:
                 senders = [names[entry['sender-1']]]
-                print(names[entry['sender-1']])
-                sender_1 = names[entry['sender-1']]['name']
+                sender_1 = names[entry['sender-1']]['gnd_name']
             else:
                 sender_1 = entry['sender-1']
                 senders.append({
                     'name': entry['sender-1'],
+                    'gnd_name': entry['sender-1'],
                     'gnd': None,
                     'birth': None,
                     'death': None
@@ -43,11 +43,12 @@ def parse_gesamtdatenbank():
             if entry['sender-2']:
                 if entry['sender-2'] in names:
                     senders.append(names[entry['sender-2']])
-                    sender_2 = names[entry['sender-2']]['name']
+                    sender_2 = names[entry['sender-2']]['gnd_name']
                 else:
                     sender_2 = entry['sender-2']
                     senders.append({
                         'name': entry['sender-2'],
+                        'gnd_name': entry['sender-2'],
                         'gnd': None,
                         'birth': None,
                         'death': None
@@ -59,11 +60,12 @@ def parse_gesamtdatenbank():
             recipients = []
             if entry['recipient-1'] in names:
                 recipients = [names[entry['recipient-1']]]
-                recipient_1 = names[entry['recipient-1']]['name']
+                recipient_1 = names[entry['recipient-1']]['gnd_name']
             else:
                 recipient_1 = entry['recipient-1']
                 recipients.append({
                     'name': entry['recipient-1'],
+                    'gnd_name': entry['recipient-1'],
                     'gnd': None,
                     'birth': None,
                     'death': None
@@ -75,11 +77,12 @@ def parse_gesamtdatenbank():
             if entry['recipient-2']:
                 if entry['recipient-2'] in names:
                     recipients.append(names[entry['recipient-2']])
-                    recipient_2 = names[entry['recipient-2']]['name']
+                    recipient_2 = names[entry['recipient-2']]['gnd_name']
                 else:
                     recipient_2 = entry['recipient-2']
                     recipients.append({
                         'name': entry['recipient-2'],
+                        'gnd_name': entry['recipient-2'],
                         'gnd': None,
                         'birth': None,
                         'death': None
@@ -172,6 +175,16 @@ def parse_gesamtdatenbank():
                 if aufbewahrungsort in reference:
                     relevant_holding_locations.append(aufbewahrungsort)
 
+            sender_names = []
+            for sender in senders:
+                sender_names.append(sender['name'])
+                sender_names.append(sender['gnd_name'])
+
+            recipient_names = []
+            for recipient in recipients:
+                recipient_names.append(recipient['name'])
+                recipient_names.append(recipient['gnd_name'])
+
             result = {
                 'index': index,
                 'xml_id': entry['xml-id'],
@@ -179,8 +192,8 @@ def parse_gesamtdatenbank():
                 'status': entry['auswahl'],
                 'senders': senders,
                 'recipients': recipients,
-                'sender_names': [sender['name'] for sender in senders],
-                'recipient_names': [recipient['name'] for recipient in recipients],
+                'sender_names': sender_names,
+                'recipient_names': recipient_names,
                 'placename_sent': entry['sender-placeName'],
                 'placename_received': entry['recipient-placeName'],
                 'date_cert': entry['date-cert'],
@@ -229,7 +242,8 @@ def parse_names():
         names_by_full_name = {}
         for entry in csvreader:
             result = {
-                'name': entry['gnd-name'],
+                'name': entry['name'],
+                'gnd_name': entry['gnd-name'],
                 'gnd': entry['gnd-id'] if len(entry['gnd-id']) else None,
                 'birth': entry['j-geburt'],
                 'death': entry['j-tod']
