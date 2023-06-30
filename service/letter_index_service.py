@@ -26,7 +26,8 @@ def parse_gesamtdatenbank():
             senders = []
             if entry['sender-1'] in names:
                 senders = [names[entry['sender-1']]]
-                sender_1 = names[entry['sender-1']]['gnd_name']
+                gnd_name = names[entry['sender-1']]['gnd_name']
+                sender_1 = gnd_name if len(gnd_name) else names[entry['sender-1']]['name']
             else:
                 sender_1 = entry['sender-1']
                 senders.append({
@@ -43,7 +44,8 @@ def parse_gesamtdatenbank():
             if entry['sender-2']:
                 if entry['sender-2'] in names:
                     senders.append(names[entry['sender-2']])
-                    sender_2 = names[entry['sender-2']]['gnd_name']
+                    gnd_name = names[entry['sender-2']]['gnd_name']
+                    sender_2 = gnd_name if len(gnd_name) else names[entry['sender-2']]['name']
                 else:
                     sender_2 = entry['sender-2']
                     senders.append({
@@ -60,7 +62,8 @@ def parse_gesamtdatenbank():
             recipients = []
             if entry['recipient-1'] in names:
                 recipients = [names[entry['recipient-1']]]
-                recipient_1 = names[entry['recipient-1']]['gnd_name']
+                gnd_name = names[entry['recipient-1']]['gnd_name']
+                recipient_1 = gnd_name if len(gnd_name) else names[entry['recipient-1']]['name']
             else:
                 recipient_1 = entry['recipient-1']
                 recipients.append({
@@ -77,7 +80,8 @@ def parse_gesamtdatenbank():
             if entry['recipient-2']:
                 if entry['recipient-2'] in names:
                     recipients.append(names[entry['recipient-2']])
-                    recipient_2 = names[entry['recipient-2']]['gnd_name']
+                    gnd_name = names[entry['recipient-2']]['gnd_name']
+                    recipient_2 = gnd_name if len(gnd_name) else names[entry['recipient-2']]['name']
                 else:
                     recipient_2 = entry['recipient-2']
                     recipients.append({
@@ -246,7 +250,8 @@ def parse_names():
                 'gnd_name': entry['gnd-name'],
                 'gnd': entry['gnd-id'] if len(entry['gnd-id']) else None,
                 'birth': entry['j-geburt'],
-                'death': entry['j-tod']
+                'death': entry['j-tod'],
+                'date_special': entry['j-special'] if len(entry['j-special']) else None
             }
 
             names_by_full_name[entry['name']] = result
