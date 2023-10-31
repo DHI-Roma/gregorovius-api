@@ -259,7 +259,7 @@ async def get_beacon_see_also(gnd: str):
     Get references in other data sources for a given GND number
     """
     headers =  {'Content-Type': 'application/json'}
-    url = 'https://beacon.findbuch.de/seealso/pnd-aks?format=seealso&id=' + gnd
+    url = 'http://beacon.findbuch.de/seealso/pnd-aks?format=seealso&id=' + gnd
     findbuch_response = requests.get(url, headers=headers)
     findbuch_response.encoding = 'UTF-8'
 
