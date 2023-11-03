@@ -14,7 +14,6 @@ def parse_gesamtdatenbank():
     index = 0
 
     names = parse_names()
-    print(names)
 
     with open(os.path.dirname(__file__) + '/../data/gesamtdatenbank.csv', encoding='utf-8') as csvfile:
         csvreader = csv.DictReader(csvfile, delimiter=';')
