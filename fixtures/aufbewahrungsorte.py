@@ -9,7 +9,7 @@ aufbewahrungsorte = [
     "Berlin, Deutsches Historisches Museum",
     "GhStA Berlin",
     "Berlin, Privatbesitz Angela Steinsiek",
-    "SBB-PK",
+    "SBB – PK",
     "Biella, Fondazione Sella",
     "Bochum, Heimatstube der Kreisgemeinschaft Neidenburg",
     "Bologna, Biblioteca dell’Archiginnasio",
