@@ -6,5 +6,4 @@ app/__pycache__/
 config.yml
 .db-version
 img
-data/*
 .DS_Store
