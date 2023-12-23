@@ -1,5 +1,5 @@
 ﻿type;name;gnd-id;gnd-url;bemerkungen;gnd-name;lobid-search-url;j-special;j-geburt;j-tod
-persName;Julius Pianka, Ferdinand Gregorovius, Leopold Pianka, Gustav Gregorovius;;;;"Pianka, Julius; Gregorovius, Ferdinand; Pianka, Leopold; Gregorovius, Gustav";;1818–1892, 1821–1891, (?), 1810–1862 ;;
+persName;Julius Pianka, Ferdinand Gregorovius, Leopold Pianka und Gustav Gregorovius;;;;"Pianka, Julius; Gregorovius, Ferdinand; Pianka, Leopold; Gregorovius, Gustav";;1818–1892, 1821–1891, 1820–1870, 1810–1862 ;;
 persName;Alfredo d’Andrade, Giovanni Scanzi, Francesco Semino, Maurizio Dufour, Lazzaro Negrotto Cambiaso;;;;"d'Andrade, Alfredo; Scanzi, Giovanni; Semino, Francesco; Dufour, Maurizio; Cambiaso Negrotto, Lazzaro";;1839–1915, 1840–1915,1832–1883, 1826–1897, 1823–1902;;
 persName;Ignazio Ciampi, Quirino Leoni, Filippo Cagiati;;;;"Ciampi, Ignazio; Leoni, Quirino; Cagiati, Filippo";;1824–1880, 1828–1897, 1821–1896;;
 persName;Karl Lindemann-Frommel, Raffaele Mariano;;;;"Lindemann-Frommel, Karl; Mariano, Raffaele";;1819–1891, 1840–1912;;
@@ -286,7 +286,7 @@ persName;Francesco Paolo Perez;119279649;;;Perez, Francesco Paolo;;;1812;1892
 persName;Paolo Perez;1025796071;;;Perez, Paolo;;;1822;1879
 persName;Luigi Pianciani;119146673;;;Pianciani, Luigi;;;1810;1890
 persName;Julius Pianka;12120944X;;;Pianka, Julius;;;1818;1892
-persName;Leopold Pianka;;;;Pianka, Leopold ;;;;
+persName;Leopold Pianka;;;;Pianka, Leopold ;;;1820;1870
 persName;Bertha von Piloty;116185880;;;Piloty, Bertha von;;;1838;1918
 persName;Carl Theodor von Piloty;118641662;http://d-nb.info/gnd/118641662;;Piloty, Karl von;http://lobid.org/gnd/search?q=Carl+Theodor+von+Piloty;;1826;1886
 persName;Anton Graf Prokesch von Osten;118596713;http://d-nb.info/gnd/118596713;;Prokesch von Osten, Anton Graf;http://lobid.org/gnd/search?q=Anton+Graf+Prokesch+von+Osten;;1795;1876
