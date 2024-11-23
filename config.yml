@@ -1,5 +1,5 @@
-collection: '/db/projects/gregorovius/data-sync'
-collection_alternative: '/db/projects/gregorovius/data-sync-alternative'
+collection: '/db/apps/gregorovius/data-sync'
+collection_alternative: '/db/apps/gregorovius/data-sync-alternative'
 xslt: True
 
 entities:
