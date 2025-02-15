@@ -76,7 +76,7 @@ class Service:
         self.manifest_entities = manifest['entities']
         self.db = db
         self.entities = {
-            name: self.db.retrieve_resources(manifest["xpath"])
+            name: self.db.xpath(manifest["xpath"])
             for name, manifest in self.manifest_entities.items()
         }
         try:
@@ -85,77 +85,6 @@ class Service:
             self.id_attr = '{http://www.w3.org/XML/1998/namespace}id'
         if watch_updates:
             UpdateWatcher(self.db, self.entities)
-        self._initialize_search_indices()
-
-    def _initialize_search_indices(self):
-        """
-        Create Lucene search configurations according to config.yml,
-        store them in the database and initiate reindexing.
-        """
-        searchable_entities = [
-            entity_conf["search_index"] for entity_name, entity_conf in self.manifest["entities"].items()
-            if "search_index" in entity_conf
-        ]
-        text_config = ""
-        for unit in searchable_entities:
-            try:
-                for text in unit["text"]:
-                    text_config += (
-                        f"<text {text['type']}='{text['pattern']}'>"
-                        f"<inline qname='{text['inline-qname']}'/>"
-                    )
-
-                    if "fields" in text:
-                        for field in text["fields"]:
-                            text_config += f"<field name='{field['name']}' expression='{field['expression']}' />"
-
-                    if "ignore" in text:
-                        text_config += f"<ignore  qname='{text['ignore']}'/>"
-                    text_config += "</text>"
-            except KeyError:
-                raise ValueError(f"Error reading search index configuration: {unit}.")
-
-        config = (
-            "<collection xmlns='http://exist-db.org/collection-config/1.0'>"
-            "<index xmlns:tei='http://www.tei-c.org/ns/1.0'>"
-            "<fulltext default='none' attributes='false'/>"
-            "<lucene>"
-            "<analyzer class='org.apache.lucene.analysis.standard.StandardAnalyzer'/>"
-            f"{text_config}"
-            "</lucene>"
-            "</index>"
-            "</collection>"
-        )
-        collection = self.manifest['collection']
-        collection_alternative = self.manifest['collection_alternative']
-
-        config_path = f"/db/system/config{collection}"
-        config_path_alternative = f"/db/system/config{collection_alternative}"
-        try:
-            self.db.query(
-                f'(xmldb:create-collection("/db/system/config", "{collection}"),'
-                f'xmldb:store("{config_path}", "collection.xconf", "{config}"),'
-                f'xmldb:reindex("{collection}"))'
-            )
-
-            self.db.query(
-                f'(xmldb:create-collection("/db/system/config", "{collection_alternative}"),'
-                f'xmldb:store("{config_path_alternative}", "collection.xconf", "{config}"),'
-                f'xmldb:reindex("{collection_alternative}"))'
-            )
-        except HTTPError as e:
-            print(e)
-
-        collection_alt = self.manifest['collection_alternative']
-        config_path_alt = f"/db/system/config{collection}"
-        try:
-            self.db.query(
-                f'(xmldb:create-collection("/db/system/config", "{collection_alt}"),'
-                f'xmldb:store("{config_path_alt}", "collection.xconf", "{config}"),'
-                f'xmldb:reindex("{collection_alt}"))'
-            )
-        except HTTPError as e:
-            print(e)
 
     def get_entities(self, entity_name: str) -> List[EntityMeta]:
         """
@@ -189,9 +118,8 @@ class Service:
             if output_format == "xml":
                 return str(resource.node)
             elif output_format == "json":
-                try:
-                    output = resource.node.css_select("teiHeader").pop()
-                except IndexError:
+                output = resource.node.css_select("teiHeader").first
+                if output is None:
                     output = resource.node
                 return xmltodict.parse(str(output))
             else:
@@ -199,7 +127,7 @@ class Service:
                     f"Invalid format: {output_format}."
                     f"Only 'xml' and 'json' are supported."
                 )
-        return resource
+        return str(resource)
 
     def get_search_results(self, entity: str, keyword: str, width: int) -> Dict:
         """
@@ -253,18 +181,18 @@ class Service:
             query += "</envelope>"
 
             query_results = self.db.query(query)
-            results = query_results.css_select("envelope")
+            results = query_results.cssselect("envelope")
         except HTTPError as e:
             results  = []
         output = []
         for r in results:
-            for p in r.xpath(".//p"): 
-                context_previous = p.xpath(".//span[@class='previous']").pop().full_text
-                context_hi = p.xpath(".//span[@class='hi']").pop().full_text
-                context_following = p.xpath(".//span[@class='following']").pop().full_text
-                score = r.xpath(".//score").pop().full_text
-                entity_id = r.xpath(".//id").pop().full_text
-                entity_type = r.xpath(".//type").pop().full_text
+            for p in r.xpath(".//p"):
+                context_previous = p.xpath(".//span[@class='previous']").pop().text
+                context_hi = p.xpath(".//span[@class='hi']").pop().text
+                context_following = p.xpath(".//span[@class='following']").pop().text
+                score = r.xpath(".//score").pop().text
+                entity_id = r.xpath(".//id").pop().text
+                entity_type = r.xpath(".//type").pop().text
 
                 entry = {
                     "score": score,
@@ -275,7 +203,7 @@ class Service:
                 }
 
                 if not should_get_document_id:
-                    entity_related_id = r.xpath(".//related").pop().full_text
+                    entity_related_id = r.xpath(".//related").pop().text
                     entry["entity_related_id"] = entity_related_id
 
                 output.append(entry)
