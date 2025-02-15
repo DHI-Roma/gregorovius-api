@@ -3,13 +3,13 @@ from typing import List
 import requests
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
+from lxml import etree
 from snakesist.exist_client import ExistClient
 from starlette.responses import Response, JSONResponse, PlainTextResponse, FileResponse, StreamingResponse
 from starlette.requests import Request
 from random import choice
 from string import ascii_letters
 from pathlib import Path
-from multiprocessing import Manager
 from diskcache import Cache
 
 from service import Service, beacon_service, image_service, letter_index_service
@@ -28,8 +28,8 @@ origins = [
 ]
 
 
-db = ExistClient(host="db")
-# db = ExistClient(host="localhost")
+db = ExistClient(host="db", parser=etree.XMLParser(recover=True))
+# db = ExistClient(host="localhost", port=8071, parser=etree.XMLParser(recover=True))
 db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
 
@@ -75,7 +75,7 @@ async def cmif_api():
     Get correspondence metadata in CMI format
     """
     return XMLResponse(
-        content=str(db.retrieve_resources("//*:TEI[@type='cmif']").pop())
+        content=str(db.xpath("//*:TEI[@type='cmif']").pop())
     )
 
 

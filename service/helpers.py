@@ -1,6 +1,8 @@
+from types import NoneType
+
 from delb import TagNode
 from typing import Dict
-from snakesist.exist_client import Resource
+from snakesist.exist_client import NodeResource as Resource
 
 from models import EntityMeta
 
@@ -43,7 +45,10 @@ def process_property_value(node: TagNode, property_manifest: Dict) -> str:
                 if "filter" in property_manifest:
                     output = apply_filter(node[val], property_manifest["filter"])
                 else:
-                    output = normalize_whitespace(node[val])
+                    output = normalize_whitespace(node[val] if node[val] else '')
+                # Output can return empty strings. We don't want those. Get the first attribute match.
+                if output:
+                    return output
             except KeyError:
                 continue
     else:
@@ -152,8 +157,9 @@ def xml_to_entitymeta(
     except (KeyError, TypeError):
         print(f"Warning: No @xml:id found for '{entity_name}' item! Item endpoint will not be accessible.")
         node_id = ''
+
     return EntityMeta(
-        id=node_id,
+        id=str(node_id),
         entity=entity_name,
         properties=properties
     )

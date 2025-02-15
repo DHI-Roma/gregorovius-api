@@ -1,17 +1,16 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.6-2020-12-19
-
+FROM python:3.13.2-alpine3.21
 WORKDIR /backend
 COPY . /backend
 
-RUN pip install --no-cache-dir --upgrade pip \
-  && pip install --no-cache-dir poetry==1.0.0 \
+RUN apk add gcc build-base \
+  && pip install --no-cache-dir --upgrade pip \
+  && pip install --no-cache-dir poetry==2.0.1 \
   && pip install uvicorn \
   && poetry config virtualenvs.create false \
-  && poetry install --no-dev \
-  && pip uninstall --yes poetry
+  && poetry install
 
-RUN sed -i "s/CipherString = DEFAULT@SECLEVEL=2/CipherString = DEFAULT@SECLEVEL=1/g" /etc/ssl/openssl.cnf
-RUN openssl rand -hex 20 > /backend/.db-version
 
 COPY . /backend
+
+CMD ["poetry", "run", "uvicorn", "app:main", "--port", "8000", "--host", "0.0.0.0", "--workers", "2"]
 
