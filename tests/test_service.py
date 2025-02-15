@@ -105,7 +105,7 @@ def test_process_properties_multiple():
         "</foo>"
     ).root
     properties = {
-        "spam": ["abc", "def"]
+        "spam": ["def", "abc"]
     }
     assert process_properties(manifest, node) == properties
 
