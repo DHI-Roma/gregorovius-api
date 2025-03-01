@@ -2,6 +2,8 @@ FROM python:3.13.2-alpine3.21
 WORKDIR /backend
 COPY . /backend
 
+ENV PORT=8000
+
 RUN apk add gcc build-base \
   && pip install --no-cache-dir --upgrade pip \
   && pip install --no-cache-dir poetry==2.0.1 \
@@ -12,5 +14,5 @@ RUN apk add gcc build-base \
 
 COPY . /backend
 
-CMD ["poetry", "run", "uvicorn", "app:main", "--port", "8000", "--host", "0.0.0.0", "--workers", "2"]
+ENTRYPOINT ["/backend/entrypoint.sh"]
 
