@@ -12,7 +12,7 @@ from string import ascii_letters
 from pathlib import Path
 from diskcache import Cache
 
-from service import Service, beacon_service, image_service, letter_index_service
+from service import Service, beacon_service, cmif_service, image_service, letter_index_service
 from models import EntityMeta
 from .config import CFG, ROOT_COLLECTION, XSLT_FLAG, ENTITY_NAMES, STAGE
 
@@ -70,13 +70,25 @@ async def on_startup():
         }
     },
 )
-async def cmif_api():
+async def cmif_api(refresh: bool = False):
     """
     Get correspondence metadata in CMI format
+
+    The document is served from the cache, else from the database, else
+    generated from the letters and registers held by the service.
     """
-    return XMLResponse(
-        content=str(db.xpath("//*:TEI[@type='cmif']").pop())
-    )
+    cache_key = "/cmif"
+    if refresh:
+        cache.pop(cache_key, None)
+
+    if cache_key not in cache:
+        stored = db.xpath("//*:TEI[@type='cmif']")
+        if stored:
+            cache[cache_key] = str(stored.pop().node)
+        else:
+            cache[cache_key] = cmif_service.generate_cmif(service)
+
+    return XMLResponse(content=cache[cache_key])
 
 
 @app.get(

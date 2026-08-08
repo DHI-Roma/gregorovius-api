@@ -173,6 +173,46 @@ will create the following Lucene configuration in the eXist-db:
 Notice that the current implementation contains defaults and hard coded values. 
 This is an experimental feature for now. Please use with care.
 
+## CMIF
+
+The `/cmif` endpoint serves the correspondence metadata of the edition in
+[CMI format](https://correspsearch.net/en/cmi-format.html). The document is
+resolved in three steps:
+
+1. If it is in the cache, it is served from there
+2. Else, if a `<TEI type="cmif">` document is in the database, it is read,
+   cached and served
+3. Else it is generated from the letters and registers, cached and served
+
+Generating the document takes a while, so in production it should be present
+in the database. It is shipped as part of the
+[gregorovius-data](https://github.com/DHI-Roma/gregorovius-data) package,
+which deploys it to the `data-sync` collection.
+
+To append `?refresh=true` to the request discards the cached document and
+resolves it again. Note that the cache is per worker process, so the first
+request to each worker is a slow one.
+
+### Regenerating the document
+
+To create an updated CMIF document, run the generator against the database:
+
+```sh
+# against the database of the local Docker setup
+$ docker compose exec gregorovius_api poetry run python bin/generate_cmif.py
+
+# against an eXist instance reachable from the host
+$ poetry run python bin/generate_cmif.py --host localhost --port 8071
+```
+
+The document is written to `data/cmif.xml` by default, `--output` writes it
+elsewhere. To publish it, copy it to `data/cmif.xml` in the `gregorovius-data`
+repository and build the XAR archive there as described in its README.
+
+Letters which are not flagged as published are left out, as are letters
+referring to a person, organization or place which is missing from the
+registers. Those are reported as warnings.
+
 ## Facsimiles
 
 - Place all the facsimile images in the `img/hd` directory (ignored)
