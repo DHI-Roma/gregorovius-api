@@ -2,7 +2,7 @@ FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11-2025-02-10
 
 WORKDIR /app
 
-RUN pip install poetry lxml snakesist python-dotenv diskcache
+RUN pip install poetry lxml snakesist python-dotenv
 
 COPY ./pyproject.toml ./poetry.lock* ./
 
