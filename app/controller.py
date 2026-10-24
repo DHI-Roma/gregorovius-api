@@ -10,7 +10,6 @@ from starlette.requests import Request
 from random import choice
 from string import ascii_letters
 from pathlib import Path
-from diskcache import Cache
 
 from service import Service, beacon_service, cmif_service, image_service, letter_index_service
 from models import EntityMeta
@@ -33,7 +32,7 @@ db = ExistClient(host="db", parser=etree.XMLParser(recover=True))
 db.root_collection = ROOT_COLLECTION
 service = Service(db, CFG, watch_updates=True)
 
-cache = Cache()
+cache: dict = {}
 
 app = FastAPI()
 meta = {}
